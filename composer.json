@@ -1,0 +1,20 @@
+{
+  "name": "michel/revision_using_composer",
+  "description": "revision composer",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    },
+    "classmap": [
+      "src"
+    ]
+  },
+  "authors": [
+    {
+      "name": "michel",
+      "email": "mtchokos@gmail.com"
+    }
+  ],
+  "require": {}
+}
