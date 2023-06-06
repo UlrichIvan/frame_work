@@ -3,6 +3,8 @@
 namespace App\Router;
 
 use App\Exception\RouterException;
+use App\Http\Request;
+use App\Http\Response;
 use App\interface\RouterInterface;
 
 /**
@@ -45,5 +47,34 @@ class Router implements RouterInterface
             } catch (RouterException $e) {
                   die($e->getMessage());
             }
+      }
+
+      public function matchRequest(): void
+      {
+            $request_method = $_SERVER['REQUEST_METHOD'];
+
+            $request_uri = $_SERVER['REQUEST_URI'];
+
+            try {
+                  if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
+                        throw new RouterException(sprintf("Unexisting method $request_method call on %s ", Router::class));
+                  }
+
+                  $routes = $this->getRoutesMap()[$request_method];
+
+                  foreach ($routes as $route => $action) {
+                        if ($route === $request_uri && is_callable($action)) {
+                              call_user_func($action, new Request, new Response);
+                              exit;
+                        }
+                  }
+
+                  http_response_code(404);
+                  exit;
+            } catch (\Throwable $th) {
+                  throw $th;
+            }
+
+            var_dump($_SERVER);
       }
 }
