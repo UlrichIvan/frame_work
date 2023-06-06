@@ -10,11 +10,7 @@ $router->get("/", function () {
       echo ("hello world!!");
 });
 
-$router->post("/post", function () {
-      echo ("hello world!!");
-});
-
-$router->touch("/post", function () {
+$router->post("/post/", function () {
       echo ("hello world!!");
 });
 

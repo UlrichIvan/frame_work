@@ -10,5 +10,5 @@ interface RouterInterface
 {
       const SUPPORTED_METHODS = ["GET", "POST", "UPDATE", "PATCH", "DELETE"];
       public function getRoutesMap(): array;
-      public function  setRoutesMap(string $method, string $route, \Closure | string $action): self;
+      public function  setRoutesMap(string $method, string $route, \Closure | string $action): ?self;
 }
