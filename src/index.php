@@ -1,28 +1,27 @@
 <?php
+require(__DIR__ . "/../vendor/autoload.php");
 
 use App\Http\Request;
 use App\Http\Response;
-use App\Router\Router;
 
-require(__DIR__ . "/../vendor/autoload.php");
+$app = new App\App();
 
-$router = new Router();
+$app->accept("/", $app->json());
 
-$router->get("/", function (Request $req, Response $resp) {
-      return $resp->json([
-            "name" => "michel",
-            "status" => 200
-      ]);
+
+// $router = $app->router;
+
+$app->get("/", function (Request $req, Response $res) {
+      return $res->json($req->getHttpValues());
 });
 
-$router->post("/post/", function (Request $req, Response $resp) {
-      return $resp->json([
-            "name" => "michel",
-            "status" => 200
-      ]);
+$app->post("/", function (Request $req, Response $res) {
+      // var_dump($req);
+      return $res->json($req->getHttpValues());
 });
 
-$router->matchRequest();
+$app->run();
+
 
 
 

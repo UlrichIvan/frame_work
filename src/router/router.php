@@ -17,6 +17,17 @@ class Router implements RouterInterface
        */
       private array $routesMap = [];
 
+      public Request $request;
+      public Response $response;
+
+      public function __construct()
+      {
+            $this->request = new Request();
+            $this->response = new Response();
+      }
+
+
+
       // add new routes and action inside of routes mapped property
       public function  setRoutesMap(string $method, string $route, \Closure | string $action): ?self
       {
@@ -49,7 +60,7 @@ class Router implements RouterInterface
             }
       }
 
-      public function matchRequest(): void
+      public function run(): void
       {
             $request_method = $_SERVER['REQUEST_METHOD'];
 
@@ -64,7 +75,7 @@ class Router implements RouterInterface
 
                   foreach ($routes as $route => $action) {
                         if ($route === $request_uri && is_callable($action)) {
-                              call_user_func($action, new Request, new Response);
+                              call_user_func($action, $this->request, $this->response);
                               exit;
                         }
                   }
