@@ -160,15 +160,13 @@ class Router implements RouterInterface
 
                   $routeMapped = null;
 
-                  // $this->response->json(["uri" => $this->request->getUri(), "GET" => $this->request->getQuery()]);
-
                   // if maps is empty close request with 404 header method
                   if (empty($maps)) {
                         http_response_code(404);
                         exit;
                   }
 
-                  // call first all middlewares
+                  // call all middlewares 
                   if (is_array($middlewares) && !empty($middlewares)) {
                         foreach ($middlewares as $middleware) {
                               if (is_callable($middleware)) {
