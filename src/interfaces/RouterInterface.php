@@ -8,7 +8,7 @@ namespace App\interface;
  */
 interface RouterInterface
 {
-      const SUPPORTED_METHODS = ["GET", "POST", "UPDATE", "PATCH", "DELETE"];
-      public function getRoutesMap(): array;
-      public function  setRoutesMap(string $method, string $route, \Closure | string $action): ?self;
+      const SUPPORTED_METHODS = ["GET", "POST", "UPDATE", "PATCH", "DELETE", "PUT"];
+      public function getContentRoute(string $route): ?array;
+      public function addRoutesMap(string $method, string $route, \Closure | string $action): ?self;
 }

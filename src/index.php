@@ -4,20 +4,28 @@ require(__DIR__ . "/../vendor/autoload.php");
 use App\Http\Request;
 use App\Http\Response;
 
+// create new Application 
 $app = new App\App();
 
-$app->accept("/", $app->json());
+// add middleware that match request with application/x-www-form-urlencoded and retrive the body values
+$app->accept("/", $app->urlencoded());
 
-
-// $router = $app->router;
-
-$app->get("/", function (Request $req, Response $res) {
-      return $res->json($req->getHttpValues());
+$app->get("/", function (Request $req, Response $resp) {
+      // return $resp->json($req);
 });
 
-$app->post("/", function (Request $req, Response $res) {
-      // var_dump($req);
-      return $res->json($req->getHttpValues());
+$app->post("/", function (Request $req, Response $resp) {
+
+      $resp->json(["body" => $req->getBody()]);
+
+      // $string = array_keys($_POST)[0];
+      // $body = preg_replace("#(\r\n|\r|\n|_)#", "", $string);
+      // foreach ($_POST as $key => $value) {
+      //       $val = json_decode($key);
+      //       $resp->json($val);
+      // }
+      // var_dump($body);
+      // return $resp->json([json_decode($body), $string]);
 });
 
 $app->run();
