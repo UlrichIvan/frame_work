@@ -117,7 +117,7 @@ class Request implements RequestInterface
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['server'][$field] = $item;
                   } else if (preg_match('#^QUERY_STRING$#', $key, $matched)) {
-                        $field = strtolower($matched[0]);
+                        $field = strtolower(str_replace("_STRING", "", $matched[0]));
                         $this->httpValues['request'][$field] = $item;
                   } else {
                         $field = strtolower($key);
@@ -178,7 +178,7 @@ class Request implements RequestInterface
 
       public function getUri(): ?string
       {
-            $query_string = $this->get("request", "query_string");
+            $query_string = $this->get("request", "query");
             $uri = $this->get("request", "uri");
             return !empty($query_string) ? str_replace("?" . $query_string, "", $uri) : $uri;
       }
