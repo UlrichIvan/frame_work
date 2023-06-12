@@ -145,7 +145,7 @@ class Router implements RouterInterface
       {
             $request_method = $this->request->getRequestValue('method');
 
-            $request_uri =   rtrim($this->request->getRequestValue('uri'), $this->request->getRequestValue('uri') === "/" ? "" : "/");
+            $request_uri =   rtrim($this->request->getUri(), $this->request->getUri() === "/" ? "" : "/");
 
             try {
                   if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
@@ -159,6 +159,8 @@ class Router implements RouterInterface
                   $middlewares = $this->getMiddleWares($request_uri);
 
                   $routeMapped = null;
+
+                  // $this->response->json(["uri" => $this->request->getUri(), "GET" => $this->request->getQuery()]);
 
                   // if maps is empty close request with 404 header method
                   if (empty($maps)) {
@@ -193,7 +195,5 @@ class Router implements RouterInterface
             } catch (\Throwable $th) {
                   throw $th;
             }
-
-            var_dump($_SERVER);
       }
 }

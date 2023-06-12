@@ -51,7 +51,7 @@ class App extends Router
       {
             return function () {
                   if ($this->request->hasContentTypeUrlencoded()) {
-                        $this->request->fillBody();
+                        $this->request->fillBody()->fillQuery();
                   }
             };
       }

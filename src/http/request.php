@@ -10,7 +10,7 @@ use App\interface\RequestInterface;
 class Request implements RequestInterface
 {
       private array $body = [];
-      // private array $query = [];
+      private array $query = [];
       // private array $params = [];
       private array $httpValues = [
             "http" => [],
@@ -41,11 +41,27 @@ class Request implements RequestInterface
       /**
        * Set body request value from incoming request which only has application/json value from content-type 
        */
-      public function fillBody(): void
+      public function fillBody(): ?self
       {
-            foreach ($_POST as $key => $value) {
-                  $this->body[$key] = $value;
+            if (!empty($_POST)) {
+                  foreach ($_POST as $key => $value) {
+                        $this->setBodyValue($key, $value);
+                  }
             }
+            return $this;
+      }
+
+      /**
+       * Set queries request value from incoming request which only has application/json value from content-type 
+       */
+      public function fillQuery(): ?self
+      {
+            if (!empty($_GET)) {
+                  foreach ($_GET as $key => $value) {
+                        $this->setQueryValue($key, $value);
+                  }
+            }
+            return $this;
       }
 
       /**
@@ -54,6 +70,14 @@ class Request implements RequestInterface
       public function getBody(): array
       {
             return $this->body;
+      }
+
+      /**
+       * return the body value request from incoming request
+       */
+      public function getBodyValue(string $key): ?string
+      {
+            return $this->body[$key];
       }
 
       /**
@@ -69,7 +93,7 @@ class Request implements RequestInterface
        */
       public function hasContentType(string $type): bool
       {
-            $contentType = $this->get("http", "content_type");
+            // $contentType = $this->get("http", "content_type");
 
             if (Request::CONTENT_TYPE_URL_ENCODED === "application/x-www-form-" . $type) {
                   return true;
@@ -92,6 +116,9 @@ class Request implements RequestInterface
                   } else if (preg_match('#SERVER_#', $key, $matched)) {
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['server'][$field] = $item;
+                  } else if (preg_match('#^QUERY_STRING$#', $key, $matched)) {
+                        $field = strtolower($matched[0]);
+                        $this->httpValues['request'][$field] = $item;
                   } else {
                         $field = strtolower($key);
                         $this->httpValues['system'][$field] = $item;
@@ -105,5 +132,54 @@ class Request implements RequestInterface
       public function getHttpValues(): array
       {
             return $this->httpValues;
+      }
+
+      /**
+       * Get the value of query
+       */
+      public function getQuery(): ?array
+      {
+            return $this->query;
+      }
+
+
+      /**
+       * Get the value of query
+       */
+      public function getQueryValue(string $key): ?array
+      {
+            return $this->query[$key];
+      }
+
+
+      /**
+       * Set the value of query
+       *
+       * @return  self
+       */
+      public function setQueryValue(string $key, string $value): ?self
+      {
+            $this->query[$key] = $value;
+
+            return $this;
+      }
+
+      /**
+       * Set the value of body
+       *
+       * @return  self
+       */
+      public function setBodyValue(string $key, string $value): ?self
+      {
+            $this->body[$key] = $value;
+
+            return $this;
+      }
+
+      public function getUri(): ?string
+      {
+            $query_string = $this->get("request", "query_string");
+            $uri = $this->get("request", "uri");
+            return !empty($query_string) ? str_replace("?" . $query_string, "", $uri) : $uri;
       }
 }

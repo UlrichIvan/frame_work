@@ -11,7 +11,7 @@ $app = new App\App();
 $app->accept("/", $app->urlencoded());
 
 $app->get("/", function (Request $req, Response $resp) {
-      // return $resp->json($req);
+      return $resp->json(["query" => $req->getQuery()]);
 });
 
 $app->post("/", function (Request $req, Response $resp) {
