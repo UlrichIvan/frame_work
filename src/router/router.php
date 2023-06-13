@@ -6,6 +6,7 @@ use App\Exception\RouterException;
 use App\Http\Request;
 use App\Http\Response;
 use App\interface\RouterInterface;
+use Error;
 use stdClass;
 
 /**
@@ -22,7 +23,8 @@ class Router implements RouterInterface
             //       "maps" => [
             //             [
             //                   "method" => "",
-            //                   "action" => ""
+            //                   "action" => "",
+            //                   "middlewares"=>[]
             //             ]
             //       ]
             // ],
@@ -38,11 +40,72 @@ class Router implements RouterInterface
       }
 
 
+      public function __call(string $method, array $arguments): mixed
+      {
+            try {
+                  if (!empty($arguments[2])) {
+                        $this->addRoutesMap(strtoupper($method), $arguments[0], $arguments[2]);
+                        $this->addMiddlewareToRoute($arguments[0], $arguments[1], strtoupper($method));
+                        return $this;
+                  } else {
+                        return $this->addRoutesMap(strtoupper($method), $arguments[0], $arguments[1]);
+                  }
+            } catch (RouterException $e) {
+                  die($e->getMessage());
+            }
+      }
+
+      public function setMiddlewareToRoute(string $url, $index, $middleware): ?self
+      {
+            $map = $this->routes[$url]["maps"][$index];
+
+            $map["middlewares"]
+                  = !empty($map["middlewares"]) ? [...$map["middlewares"], $middleware] : [$middleware];
+
+            $this->routes[$url]["maps"][$index] = $map;
+
+            return $this;
+      }
+
+      public function addMiddlewareToRoute(string $route, \Closure | string $middleware, ?string $method = null)
+      {
+
+            try {
+                  if (
+                        is_string($route) && !empty($route)
+                        && (is_string($middleware) || is_callable($middleware))
+                        && in_array($method, Router::SUPPORTED_METHODS, true)
+                  ) {
+
+                        $url = rtrim($route, $route === '/' ? '' : '/');
+
+                        $map = $this->getMap($url, $method);
+
+                        $mapIndex = $this->findMapIndex($url, $method);
+
+
+                        if ($mapIndex === -1 || empty($map)) {
+                              throw new Error("Unable to set middleware before route $route !!! line:" . __LINE__);
+                        }
+
+                        $this->setMiddlewareToRoute($url, $mapIndex, $middleware);
+
+                        return $this;
+                  }
+
+                  throw new Error("Unexcept arguments values on middleware. => line:" . __LINE__);
+            } catch (\Throwable $th) {
+                  throw $th;
+            }
+      }
+
+
+
 
       public function addMiddleware(string $route, \Closure | string $middleware): ?self
       {
             try {
-                  if (is_string($route) && !empty($route) && (is_string($middleware) || is_callable($middleware))) {
+                  if (is_string($route) && !empty($route) && (is_string($middleware) || is_callable($middleware)) && empty($method)) {
 
                         $url = rtrim($route, $route === '/' ? '' : '/');
 
@@ -53,7 +116,8 @@ class Router implements RouterInterface
 
                         return $this;
                   }
-                  throw new RouterException(sprintf("Unexcept middleware value %s !!!", $middleware));
+
+                  throw new RouterException("Unexcept middleware value !!! line:" . __LINE__);
             } catch (\Throwable $th) {
                   throw $th;
             }
@@ -125,20 +189,29 @@ class Router implements RouterInterface
             foreach ($maps as $map) {
                   if ($map["method"] === $method) {
                         $routemap = $map;
+                        break;
                   }
             }
 
             return $routemap;
       }
 
-      public function __call(string $method, array $arguments): mixed
+
+      /**
+       * Get specific route inside of many routes
+       */
+      public function findMapIndex(string $url, string $method): ?int
       {
-            try {
-                  $this->addRoutesMap(strtoupper($method), $arguments[0], $arguments[1]);
-                  return $this;
-            } catch (RouterException $e) {
-                  die($e->getMessage());
+            $maps = $this->routes[$url]['maps'] ?? [];
+            $index = -1;
+
+            foreach ($maps as $key => $map) {
+                  if ($map["method"] === $method) {
+                        $index = $key;
+                  }
             }
+
+            return $index;
       }
 
       public function run(): void
@@ -160,11 +233,14 @@ class Router implements RouterInterface
 
                   $routeMapped = null;
 
+                  $routesMiddlewares = [];
+
                   // if maps is empty close request with 404 header method
                   if (empty($maps)) {
                         http_response_code(404);
                         exit;
                   }
+
 
                   // call all middlewares 
                   if (is_array($middlewares) && !empty($middlewares)) {
@@ -179,11 +255,20 @@ class Router implements RouterInterface
                   foreach ($maps as $map) {
                         if ($map['method'] === $request_method) {
                               $routeMapped = (object) $map;
+                              $routesMiddlewares = $map["middlewares"] ?? [];
                               break;
                         }
                   }
 
-                  if (!empty($routeMapped)) {
+                  if (!empty($routeMapped) && empty($routesMiddlewares)) {
+                        call_user_func($routeMapped->action, $this->request, $this->response);
+                        exit;
+                  } elseif (!empty($routeMapped) && !empty($routesMiddlewares)) {
+                        foreach ($routesMiddlewares as $middleware) {
+                              if (is_callable($middleware)) {
+                                    call_user_func($middleware, $this->request, $this->response);
+                              }
+                        }
                         call_user_func($routeMapped->action, $this->request, $this->response);
                         exit;
                   } else {

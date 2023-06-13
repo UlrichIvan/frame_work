@@ -2,8 +2,6 @@
 
 namespace App;
 
-use App\Http\Request;
-use App\Http\Response;
 use App\Router\Router;
 use Closure;
 use Error;
@@ -15,37 +13,25 @@ class App extends Router
 {
       public $name = "App";
 
-      private array $accpets = [];
 
       function __construct()
       {
             parent::__construct();
       }
 
-      public function getAccepts(): array
-      {
-            return $this->accpets;
-      }
-
-      public function setAccepts(string $url, Closure $cb): void
+      public function accept(string $url, Closure $cb): ?self
       {
             try {
-                  if (empty($url) || !is_string($url)) {
-                        throw new Error("Invalid parameters set on accept method");
+                  if (empty($url) || !is_string($url) || !is_callable($cb)) {
+                        throw new Error("Invalid arguments $url;$cb set on " . __METHOD__ . " method");
                   }
                   $this->addMiddleware($url, $cb);
+                  return $this;
             } catch (\Throwable $th) {
                   throw $th;
             }
       }
 
-
-
-      public function accept(string $url, Closure $cb): self
-      {
-            $this->setAccepts($url, $cb);
-            return $this;
-      }
 
       public function urlencoded(): Closure
       {

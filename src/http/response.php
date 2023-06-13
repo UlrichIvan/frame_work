@@ -2,18 +2,28 @@
 
 namespace App\Http;
 
+use App\interface\ResponseInterface;
+
 /**
  * Class Response to send response from entry request
  */
-class Response
+class Response implements ResponseInterface
 {
       private int $status;
       private string $statusText;
 
-      public function setStatus(int $status = null): self
+      public function setStatus(int $status): ?self
       {
-            $this->status = $status;
-            return $this;
+            try {
+                  if (!in_array($status, Response::HTTP_CODE_RESPONSES)) {
+                        throw new \Exception("Invalid status code send $status", 1);
+                  }
+                  $this->status = $status;
+                  http_response_code($status);
+                  return $this;
+            } catch (\Throwable $th) {
+                  throw $th;
+            }
       }
 
       public function getStatus(): ?int
@@ -32,9 +42,16 @@ class Response
             return $this->statusText;
       }
 
-      public function json(mixed $data): void
+      public function json(mixed $data): ?self
       {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode($data);
+
+            return $this;
+      }
+
+      public function close(): void
+      {
+            exit;
       }
 }

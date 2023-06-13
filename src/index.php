@@ -7,25 +7,27 @@ use App\Http\Response;
 // create new Application 
 $app = new App\App();
 
-// add middleware that match request with application/x-www-form-urlencoded and retrive the body values
+// add middleware that match request with 
+// application/x-www-form-urlencoded 
+// and fill the body and query if exists
 $app->accept("/", $app->urlencoded());
 
 $app->get("/", function (Request $req, Response $resp) {
+      $resp->setStatus(500)->json(["status" => $resp->getStatus()]);
+}, function (Request $req, Response $resp) {
       return $resp->json(["query" => $req->getQuery()]);
 });
 
 $app->post("/", function (Request $req, Response $resp) {
+      $resp->setStatus(200)->json(["body" => $req->getBody()])->close();
+}, function (Request $req, Response $resp) {
+      $resp->json(["body" => $req->getBody()])->close();
+});
 
-      $resp->json(["body" => $req->getBody()]);
-
-      // $string = array_keys($_POST)[0];
-      // $body = preg_replace("#(\r\n|\r|\n|_)#", "", $string);
-      // foreach ($_POST as $key => $value) {
-      //       $val = json_decode($key);
-      //       $resp->json($val);
-      // }
-      // var_dump($body);
-      // return $resp->json([json_decode($body), $string]);
+$app->post("/articles", function (Request $req, Response $resp) {
+      $resp->setStatus(200)->json([$req->getBody()])->close();
+}, function (Request $req, Response $resp) {
+      $resp->json(["body" => $req->getBody()])->close();
 });
 
 $app->run();
