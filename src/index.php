@@ -31,8 +31,3 @@ $app->post("/articles", function (Request $req, Response $resp) {
 });
 
 $app->run();
-
-
-
-
-// var_dump($router->getRoutesMap());

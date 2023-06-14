@@ -4,7 +4,7 @@ namespace App;
 
 use App\Router\Router;
 use Closure;
-use Error;
+use InvalidArgumentException;
 
 /**
  * manage application 
@@ -23,12 +23,12 @@ class App extends Router
       {
             try {
                   if (empty($url) || !is_string($url) || !is_callable($cb)) {
-                        throw new Error("Invalid arguments $url;$cb set on " . __METHOD__ . " method");
+                        throw new InvalidArgumentException("Invalid arguments set on " . __METHOD__ . " method");
                   }
                   $this->addMiddleware($url, $cb);
                   return $this;
-            } catch (\Throwable $th) {
-                  throw $th;
+            } catch (\InvalidArgumentException $e) {
+                  die($e->getMessage());
             }
       }
 

@@ -77,7 +77,7 @@ class Router implements RouterInterface
                         && in_array($method, Router::SUPPORTED_METHODS, true)
                   ) {
 
-                        $url = rtrim($route, $route === '/' ? '' : '/');
+                        $url = $this->clearUri($route);
 
                         $map = $this->getMap($url, $method);
 
@@ -99,15 +99,20 @@ class Router implements RouterInterface
             }
       }
 
-
-
+      /**
+       * return the clean uri value
+       */
+      private function clearUri(string $uri): string
+      {
+            return rtrim($uri, $uri === '/' ? '' : '/');
+      }
 
       public function addMiddleware(string $route, \Closure | string $middleware): ?self
       {
             try {
                   if (is_string($route) && !empty($route) && (is_string($middleware) || is_callable($middleware)) && empty($method)) {
 
-                        $url = rtrim($route, $route === '/' ? '' : '/');
+                        $url = $this->clearUri($route);
 
                         $middlewares = $this->getMiddleWares($url);
 
@@ -151,15 +156,15 @@ class Router implements RouterInterface
 
       public function getMiddleWares(string $url): ?array
       {
-            return $this->routes[$url]["middlewares"];
+            return !empty($this->routes[$url]["middlewares"]) ? $this->routes[$url]["middlewares"] : null;
       }
 
       /**
        * Get route with method request
        */
-      public function getContentRoute(string $route): ?array
+      public function getContentRoute(string $url): ?array
       {
-            return $this->routes[$route];
+            return !empty($this->routes) ? $this->routes[$url] : null;
       }
 
       /**
