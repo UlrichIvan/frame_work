@@ -6,8 +6,8 @@ use App\Exception\RouterException;
 use App\Http\Request;
 use App\Http\Response;
 use App\interface\RouterInterface;
+use Closure;
 use Error;
-use stdClass;
 
 /**
  * class to manage routes
@@ -55,7 +55,7 @@ class Router implements RouterInterface
             }
       }
 
-      public function setMiddlewareToRoute(string $url, $index, $middleware): ?self
+      public function setMiddlewareToRoute(string $url, int $index, Closure $middleware): ?self
       {
             $map = $this->routes[$url]["maps"][$index];
 
@@ -83,9 +83,8 @@ class Router implements RouterInterface
 
                         $mapIndex = $this->findMapIndex($url, $method);
 
-
-                        if ($mapIndex === -1 || empty($map)) {
-                              throw new Error("Unable to set middleware before route $route !!! line:" . __LINE__);
+                        if (!empty($map) && empty($map["middlewares"])) {
+                              throw new Error("Unable to set middleware on exisiting $route route !!! line:" . __LINE__);
                         }
 
                         $this->setMiddlewareToRoute($url, $mapIndex, $middleware);
@@ -172,7 +171,7 @@ class Router implements RouterInterface
        */
       public function getMaps(string $route): ?array
       {
-            return $this->routes[$route]['maps'];
+            return !empty($this->routes[$route]['maps']) ? $this->routes[$route]['maps'] : null;
       }
 
       /**
