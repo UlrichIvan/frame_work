@@ -1,12 +1,21 @@
 <?php
 
+namespace App\Types;
+
 use App\Types\ArrayMap;
 
 class Map
 {
       private string $method;
-      private \Closure $action;
+      private ?\Closure $action;
       private ArrayMap $middlewares;
+
+      public function __construct(string $method = "", \Closure $action = null, ArrayMap $middlewares = new ArrayMap())
+      {
+            $this->method = $method;
+            $this->action = $action;
+            $this->middlewares = $middlewares;
+      }
 
       /**
        * Get the value of method
@@ -41,7 +50,7 @@ class Map
        *
        * @return  self
        */
-      public function setAction($action)
+      public function setAction(\Closure $action)
       {
             $this->action = $action;
 
@@ -66,5 +75,26 @@ class Map
             $this->middlewares = $middlewares;
 
             return $this;
+      }
+
+
+      /**
+       * verify if method exists
+       *
+       * @return  bool
+       */
+      public function hasMethod(): bool
+      {
+            return !empty($this->getMethod()) ? true : false;
+      }
+
+      /**
+       * verify if method exists
+       *
+       * @return  bool
+       */
+      public function hasAction(): bool
+      {
+            return !empty($this->getAction()) ? true : false;
       }
 }

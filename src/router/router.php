@@ -2,12 +2,17 @@
 
 namespace App\Router;
 
+use App\Exception\RouteException;
 use App\Exception\RouterException;
 use App\Http\Request;
 use App\Http\Response;
 use App\interface\RouterInterface;
+use App\Routes\Route;
+use App\Types\ArrayMap;
+use App\Types\Map;
 use Closure;
 use Error;
+use InvalidArgumentException;
 
 /**
  * class to manage routes
@@ -17,18 +22,19 @@ class Router implements RouterInterface
       /**   
        * contents routes with mapping actions
        */
-      private array $routes = [
-            // "/" => [
-            //       "middlewares" => [],
-            //       "maps" => [
-            //             [
-            //                   "method" => "",
-            //                   "action" => "",
-            //                   "middlewares"=>[]
-            //             ]
-            //       ]
-            // ],
-      ];
+      //  [
+      //       // "/" => [
+      //       //       "middlewares" => [],
+      //       //       "maps" => [
+      //       //             [
+      //       //                   "method" => "",
+      //       //                   "action" => "",
+      //       //                   "middlewares"=>[]
+      //       //             ]
+      //       //       ]
+      //       // ],
+      // ];
+      private ArrayMap $routes;
 
       public Request $request;
       public Response $response;
@@ -36,186 +42,197 @@ class Router implements RouterInterface
       public function __construct()
       {
             $this->request = new Request();
+
             $this->response = new Response();
+
+            $this->setRoutes(new ArrayMap());
       }
 
 
-      public function __call(string $method, array $arguments): mixed
+      public function __call(string $method, array $args): mixed
       {
             try {
-                  if (!empty($arguments[2])) {
-                        $this->addRoutesMap(strtoupper($method), $arguments[0], $arguments[2]);
-                        $this->addMiddlewareToRoute($arguments[0], $arguments[1], strtoupper($method));
+                  if (!in_array($method, self::SUPPORTED_METHODS, true)) {
+                        throw new InvalidArgumentException("Call unexisting method " . __METHOD__ . " in " . __CLASS__ . " at line:" . __LINE__);
+                  }
+
+                  if (!is_string($args[0]) || empty($args[0]) || !is_callable($args[1]) || !empty($args[2]) && !is_callable($args[2])) {
+                        throw new InvalidArgumentException("invalid arguments set on " . __METHOD__ . " in " . __CLASS__ . " at line:" . __LINE__);
+                  }
+
+                  if (!empty($args[2])) {
+
+                        $this->addRoutes(strtoupper($method), $args[0], $args[2]);
+
+                        $this->addMiddlewareToMap(strtoupper($method), $args[0], $args[1]);
+
                         return $this;
                   } else {
-                        return $this->addRoutesMap(strtoupper($method), $arguments[0], $arguments[1]);
+                        return $this->addRoutes(strtoupper($method), $args[0], $args[1]);
                   }
             } catch (RouterException $e) {
                   die($e->getMessage());
             }
       }
 
-      public function setMiddlewareToRoute(string $url, int $index, Closure $middleware): ?self
-      {
-            $map = $this->routes[$url]["maps"][$index];
-
-            $map["middlewares"]
-                  = !empty($map["middlewares"]) ? [...$map["middlewares"], $middleware] : [$middleware];
-
-            $this->routes[$url]["maps"][$index] = $map;
-
-            return $this;
-      }
-
-      public function addMiddlewareToRoute(string $route, \Closure | string $middleware, ?string $method = null)
+      /**
+       * Add middleware to signle route
+       */
+      public function addMiddlewareToMap(string $method, string $route, \Closure $middleware): ?self
       {
 
             try {
-                  if (
-                        is_string($route) && !empty($route)
-                        && (is_string($middleware) || is_callable($middleware))
-                        && in_array($method, Router::SUPPORTED_METHODS, true)
-                  ) {
+                  if (!is_string($route) || empty($route) || !is_callable($middleware) || !in_array($method, self::SUPPORTED_METHODS, true)) {
+                        throw new InvalidArgumentException("invalid arguments set to " . __CLASS__ . "  !!! line:" . __LINE__);
+                  }
 
-                        $url = $this->clearUri($route);
+                  $uri = $this->clearUri($route);
 
-                        $map = $this->getMap($url, $method);
-
-                        $mapIndex = $this->findMapIndex($url, $method);
-
-                        if (!empty($map) && empty($map["middlewares"])) {
-                              throw new Error("Unable to set middleware on exisiting $route route !!! line:" . __LINE__);
-                        }
-
-                        $this->setMiddlewareToRoute($url, $mapIndex, $middleware);
-
+                  // if route not exists create it and add new map
+                  if (!$this->routes->has($uri)) {
+                        $this->routes->add($uri, new Route(new ArrayMap(), new ArrayMap(new Map($method, null, new ArrayMap($middleware)))));
                         return $this;
                   }
 
-                  throw new Error("Unexcept arguments values on middleware. => line:" . __LINE__);
+                  // get existing route
+                  $route = $this->routes->get($uri);
+
+                  // get all maps from route
+                  $maps = $route->getMaps();
+
+                  // add new middleware
+                  $maps->append(new Map($method, null, new ArrayMap($middleware)));
+
+                  // set updated maps
+                  $route->setMaps($maps);
+
+                  $this->routes->add($uri, $route);
+
+                  return $this;
             } catch (\Throwable $th) {
                   throw $th;
+            }
+      }
+
+
+      /**
+       * add new routes and action inside of routes mapped property
+       */
+      public function  addRoutes(string $method, string $route, \Closure $action): ?self
+      {
+            try {
+                  // clean uri
+                  $uri = $this->clearUri($route);
+
+                  // if route not exists add it to routes
+                  if (empty($this->routes->get($uri))) {
+                        $this->routes->add($uri, new Route(new ArrayMap(), new ArrayMap(new Map($method, $action, new ArrayMap()))));
+                        return $this;
+                  }
+
+                  throw new RouteException("Unable to duplicate route " . $route, 1);
+            } catch (RouteException $e) {
+                  die($e->getMessage());
+            }
+      }
+
+
+      /**
+       * Add global middleware to route
+       */
+      public function addMiddleware(string $route, \Closure $middleware): ?self
+      {
+            try {
+                  if (!is_string($route) || empty($route) || !is_callable($middleware)) {
+                        throw new InvalidArgumentException("invalid arguments set to " . __CLASS__ . "  !!! line:" . __LINE__);
+                  }
+
+                  $uri = $this->clearUri($route);
+
+                  if (!$this->routes->has($uri)) {
+                        $this->routes->add($uri, new Route(new ArrayMap($middleware), new ArrayMap()));
+                  }
+
+                  if ($this->routes->has($uri)) {
+
+                        // get current existing route
+                        $route = $this->routes->get($uri);
+
+                        // get current existing middlewares
+                        $middlewares = $route->getMiddleWares();
+
+                        // add new middleware to list of middlewares
+                        $middlewares->append($middleware);
+
+                        // set new middleware to route
+                        $route->setMiddlewares($middlewares);
+
+                        // add route modified
+                        $this->routes->add($uri, $route);
+                  }
+
+                  return $this;
+            } catch (\InvalidArgumentException $e) {
+                  die($e->getMessage());
             }
       }
 
       /**
        * return the clean uri value
        */
-      private function clearUri(string $uri): string
+      public function clearUri(string $uri): string
       {
             return rtrim($uri, $uri === '/' ? '' : '/');
       }
 
-      public function addMiddleware(string $route, \Closure | string $middleware): ?self
+      /**
+       * Get middlewares of route assoc to uri paramter
+       */
+      public function getMiddleWares(string $uri): ?array
       {
-            try {
-                  if (is_string($route) && !empty($route) && (is_string($middleware) || is_callable($middleware)) && empty($method)) {
+            $route = $this->routes->get($uri);
 
-                        $url = $this->clearUri($route);
-
-                        $middlewares = $this->getMiddleWares($url);
-
-                        $this->routes[$url]["middlewares"] =
-                              !empty($middlewares) ? [...$middlewares, $middleware] : [$middleware];
-
-                        return $this;
-                  }
-
-                  throw new RouterException("Unexcept middleware value !!! line:" . __LINE__);
-            } catch (\Throwable $th) {
-                  throw $th;
-            }
+            return !empty($route->getMiddleWares()) ? $route->getMiddleWares() : null;
       }
+
 
       /**
-       * add new routes and action inside of routes mapped property
+       * Get maps of route assoc to uri paramter
        */
-      public function  addRoutesMap(string $method, string $route, \Closure | string $action): ?self
+      public function getMaps(string $uri): ?array
       {
-            try {
-                  if (!in_array(strtoupper($method), Router::SUPPORTED_METHODS, true)) {
-                        throw new RouterException(sprintf("Unexisting method $method call on %s ", Router::class));
-                  }
+            $route = $this->routes->get($uri);
 
-                  if (is_string($route) && !empty($route) && (is_string($action) || is_callable($action))) {
-
-                        $url = rtrim($route, $route === "/" ? "" : "/");
-
-                        $maps = $this->getMaps($url);
-
-                        $this->routes[$url]["maps"] =  !empty($maps) ? [...$maps, ["method" => $method, "action" => $action]] : [["method" => $method, "action" => $action]];
-
-                        return $this;
-                  }
-                  throw new RouterException(sprintf("Unexcept arguments on %s method!!!", $method));
-            } catch (\Throwable $th) {
-                  throw $th;
-            }
-      }
-
-      public function getMiddleWares(string $url): ?array
-      {
-            return !empty($this->routes[$url]["middlewares"]) ? $this->routes[$url]["middlewares"] : null;
-      }
-
-      /**
-       * Get route with method request
-       */
-      public function getContentRoute(string $url): ?array
-      {
-            return !empty($this->routes) ? $this->routes[$url] : null;
-      }
-
-      /**
-       * Get maps from url
-       */
-      public function getMaps(string $route): ?array
-      {
-            return !empty($this->routes[$route]['maps']) ? $this->routes[$route]['maps'] : null;
-      }
-
-      /**
-       * Get all routes 
-       */
-      public function getRoutes(): ?array
-      {
-            return $this->routes;
-      }
-
-      /**
-       * Get specific route inside of many routes
-       */
-      public function getMap(string $url, string $method): ?array
-      {
-            $maps = $this->routes[$url]['maps'] ?? [];
-            $routemap = null;
-
-            foreach ($maps as $map) {
-                  if ($map["method"] === $method) {
-                        $routemap = $map;
-                        break;
-                  }
-            }
-
-            return $routemap;
+            return !empty($route->getMaps()) ? $route->getMaps() : null;
       }
 
 
       /**
        * Get specific route inside of many routes
        */
-      public function findMapIndex(string $url, string $method): ?int
+      public function getMap(string $uri, string $method): ?array
       {
-            $maps = $this->routes[$url]['maps'] ?? [];
-            $index = -1;
 
-            foreach ($maps as $key => $map) {
-                  if ($map["method"] === $method) {
-                        $index = $key;
-                  }
+            if (!$this->routes->has($uri)) {
+                  return null;
             }
 
-            return $index;
+            $map = $this->routes->get($uri)->getMap($method);
+
+            return !empty($map) ? $map : null;
+      }
+
+
+      /**
+       * Get specific route inside of many routes
+       */
+      public function findMapIndex(string $uri, string $method): ?int
+      {
+            if (!$this->routes->has($uri) || !empty($this->routes->get($uri)) && !$this->routes->get($uri)->hasMap($method)) {
+                  return -1;
+            }
+
+            return $this->routes->get($uri)->getMapIndex($method);
       }
 
       public function run(): void
@@ -282,5 +299,26 @@ class Router implements RouterInterface
             } catch (\Throwable $th) {
                   throw $th;
             }
+      }
+
+      /**
+       * Get all routes 
+       */
+      public function getRoutes(): ?ArrayMap
+      {
+            return $this->routes;
+      }
+
+
+      /**
+       * Set the value of routes
+       *
+       * @return  self
+       */
+      public function setRoutes($routes)
+      {
+            $this->routes = $routes;
+
+            return $this;
       }
 }

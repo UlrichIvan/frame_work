@@ -4,7 +4,7 @@ namespace App\Exception;
 
 use Exception;
 
-class RouterException extends Exception
+class RouteException extends Exception
 {
       public function __consttuct($message = "", $code = 1)
       {

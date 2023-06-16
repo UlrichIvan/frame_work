@@ -4,39 +4,19 @@ namespace App\Routes;
 
 use App\interface\RouteInterface;
 use App\Types\ArrayMap;
+use App\Types\Map;
 
 class Route implements RouteInterface
 {
-      private  string $url;
       private  ArrayMap  $middlewares;
       private  ArrayMap  $maps;
 
-      public function __construct(string $url, ArrayMap $middlewares, ArrayMap $maps)
+      public function __construct(ArrayMap $middlewares, ArrayMap $maps)
       {
-            $this->url = $url;
             $this->middlewares = $middlewares;
             $this->maps = $maps;
       }
 
-      /**
-       * Get the value of url
-       */
-      public function getUrl()
-      {
-            return $this->url;
-      }
-
-      /**
-       * Set the value of url
-       *
-       * @return  self
-       */
-      public function setUrl($url)
-      {
-            $this->url = $url;
-
-            return $this;
-      }
 
       /**
        * Get the value of middlewares
@@ -66,6 +46,7 @@ class Route implements RouteInterface
             return $this->maps;
       }
 
+
       /**
        * Set the value of maps
        *
@@ -76,5 +57,77 @@ class Route implements RouteInterface
             $this->maps = $maps;
 
             return $this;
+      }
+
+
+      /**
+       * Get map associate with specific method
+       */
+      public function getMap(string $method): ?Map
+      {
+            $maps = $this->getMaps();
+
+            $mapFound = null;
+
+            if (empty($maps)) {
+                  return null;
+            }
+
+            foreach ($maps as $map) {
+                  if (!empty($map) && $map->method === $method) {
+                        $mapFound = $map;
+                        break;
+                  }
+            }
+
+            return $mapFound;
+      }
+
+
+      /**
+       * Get index of map associate with specific method
+       */
+      public function getMapIndex(string $method): int
+      {
+            $maps = $this->getMaps();
+
+            $indexFound = -1;
+
+            if (empty($maps)) {
+                  return -1;
+            }
+
+            foreach ($maps as $index => $map) {
+                  if (!empty($map) && $map->method === $method) {
+                        $indexFound = $index;
+                        break;
+                  }
+            }
+
+            return $indexFound;
+      }
+
+
+      /**
+       * verify if map exits in maps
+       */
+      public function hasMap(string $method): ?bool
+      {
+            $maps = $this->getMaps();
+
+            $exists = false;
+
+            if (empty($maps)) {
+                  return $exists;
+            }
+
+            foreach ($maps as $map) {
+                  if (!empty($map) && $map->method === $method) {
+                        $exists = true;
+                        break;
+                  }
+            }
+
+            return $exists;
       }
 }
