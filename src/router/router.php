@@ -20,28 +20,23 @@ class Router implements RouterInterface
       /**   
        * contents routes with mapping actions
        */
-      //  [
-      //       // "/" => [
-      //       //       "middlewares" => [],
-      //       //       "maps" => [
-      //       //             [
-      //       //                   "method" => "",
-      //       //                   "action" => "",
-      //       //                   "middlewares"=>[]
-      //       //             ]
-      //       //       ]
-      //       // ],
-      // ];
       private ArrayMap $routes;
 
+      /**   
+       * contents Object Request
+       */
       public Request $request;
+
+      /**   
+       * contents Object Response
+       */
       public Response $response;
 
-      public function __construct()
+      public function __construct(Request $request = new Request(), Response $response = new Response())
       {
-            $this->request = new Request();
+            $this->request = $request;
 
-            $this->response = new Response();
+            $this->response = $response;
 
             $this->setRoutes(new ArrayMap());
       }
@@ -147,11 +142,12 @@ class Router implements RouterInterface
 
                   $uri = $this->clearUri($route);
 
-                  if (!$this->routes->has($uri)) {
-                        $this->routes->add($uri, new Route(new ArrayMap($middleware), new ArrayMap()));
+                  if ($this->routes->has($uri) === false) {
+                        $this->routes->add($uri, new Route(new ArrayMap([$middleware])));
+                        return $this;
                   }
 
-                  if ($this->routes->has($uri)) {
+                  if ($this->routes->has($uri) === true) {
 
                         // get current existing route
                         $route = $this->routes->get($uri);
@@ -167,9 +163,9 @@ class Router implements RouterInterface
 
                         // add route modified
                         $this->routes->add($uri, $route);
-                  }
 
-                  return $this;
+                        return $this;
+                  }
             } catch (\InvalidArgumentException $e) {
                   die($e->getMessage());
             }
