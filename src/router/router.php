@@ -10,8 +10,6 @@ use App\interface\RouterInterface;
 use App\Routes\Route;
 use App\Types\ArrayMap;
 use App\Types\Map;
-use Closure;
-use Error;
 use InvalidArgumentException;
 
 /**

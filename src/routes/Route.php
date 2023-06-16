@@ -11,7 +11,7 @@ class Route implements RouteInterface
       private  ArrayMap  $middlewares;
       private  ArrayMap  $maps;
 
-      public function __construct(ArrayMap $middlewares, ArrayMap $maps)
+      public function __construct(ArrayMap $middlewares = new ArrayMap(), ArrayMap $maps = new ArrayMap())
       {
             $this->middlewares = $middlewares;
             $this->maps = $maps;
@@ -52,7 +52,7 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setMaps($maps)
+      public function setMaps(ArrayMap $maps)
       {
             $this->maps = $maps;
 
@@ -74,7 +74,7 @@ class Route implements RouteInterface
             }
 
             foreach ($maps as $map) {
-                  if (!empty($map) && $map->method === $method) {
+                  if ($map->getMethod() === $method) {
                         $mapFound = $map;
                         break;
                   }
@@ -98,7 +98,7 @@ class Route implements RouteInterface
             }
 
             foreach ($maps as $index => $map) {
-                  if (!empty($map) && $map->method === $method) {
+                  if ($map->getMethod() === $method) {
                         $indexFound = $index;
                         break;
                   }
@@ -122,7 +122,7 @@ class Route implements RouteInterface
             }
 
             foreach ($maps as $map) {
-                  if (!empty($map) && $map->method === $method) {
+                  if (!empty($map) && $map->getMethod() === $method) {
                         $exists = true;
                         break;
                   }
