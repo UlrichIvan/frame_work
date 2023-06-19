@@ -3,35 +3,94 @@
 namespace App\Routes;
 
 use App\interface\RouteInterface;
-use App\Types\ArrayMap;
-use App\Types\Map;
+use Closure;
 
 class Route implements RouteInterface
 {
-      private  ArrayMap  $middlewares;
-      private  ArrayMap  $maps;
+      /**
+       * uri of route
+       */
+      private string $uri;
 
-      public function __construct(ArrayMap $middlewares = new ArrayMap(), ArrayMap $maps = new ArrayMap())
-      {
-            $this->middlewares = $middlewares;
-            $this->maps = $maps;
-      }
+      /**
+       * method associate to route
+       */
+      private string $method;
+
+      /** 
+       * array of callbacks functions or callback function call before action of route
+       */
+      private  array|Closure $middlewares;
 
 
       /**
-       * Get the value of middlewares
+       * callback function call at the last time of route
        */
-      public function getMiddlewares()
+      private Closure $action;
+
+
+      public function __construct(string $uri, string $method, array |Closure $middlewares, Closure $action)
+      {
+            $this->setUri($uri);
+            $this->setMethod($method);
+            $this->setMiddlewares($middlewares);
+            $this->setAction($action);
+      }
+
+      /**
+       * Get uri of route
+       */
+      public function getUri(): string
+      {
+            return $this->uri;
+      }
+
+      /**
+       * Set uri of route
+       *
+       * @return  self
+       */
+      public function setUri($uri): self
+      {
+            $this->uri = $uri;
+
+            return $this;
+      }
+
+      /**
+       * Get method associate to route
+       */
+      public function getMethod(): string
+      {
+            return $this->method;
+      }
+
+      /**
+       * Set method associate to route
+       *
+       * @return  self
+       */
+      public function setMethod($method): self
+      {
+            $this->method = $method;
+
+            return $this;
+      }
+
+      /**
+       * Get array of callback functions call before action of route
+       */
+      public function getMiddlewares(): array | Closure
       {
             return $this->middlewares;
       }
 
       /**
-       * Set the value of middlewares
+       * Set array of callback functions call before action of route
        *
        * @return  self
        */
-      public function setMiddlewares($middlewares)
+      public function setMiddlewares($middlewares): self
       {
             $this->middlewares = $middlewares;
 
@@ -39,95 +98,22 @@ class Route implements RouteInterface
       }
 
       /**
-       * Get the value of maps
+       * Get callback function call at the last time of route
        */
-      public function getMaps(): ArrayMap
+      public function getAction(): Closure
       {
-            return $this->maps;
+            return $this->action;
       }
 
-
       /**
-       * Set the value of maps
+       * Set callback function call at the last time of route
        *
        * @return  self
        */
-      public function setMaps(ArrayMap $maps)
+      public function setAction($action): self
       {
-            $this->maps = $maps;
+            $this->action = $action;
 
             return $this;
-      }
-
-
-      /**
-       * Get map associate with specific method
-       */
-      public function getMap(string $method): ?Map
-      {
-            $maps = $this->getMaps();
-
-            $mapFound = null;
-
-            if (empty($maps)) {
-                  return null;
-            }
-
-            foreach ($maps as $map) {
-                  if ($map->getMethod() === $method) {
-                        $mapFound = $map;
-                        break;
-                  }
-            }
-
-            return $mapFound;
-      }
-
-
-      /**
-       * Get index of map associate with specific method
-       */
-      public function getMapIndex(string $method): int
-      {
-            $maps = $this->getMaps();
-
-            $indexFound = -1;
-
-            if (empty($maps)) {
-                  return -1;
-            }
-
-            foreach ($maps as $index => $map) {
-                  if ($map->getMethod() === $method) {
-                        $indexFound = $index;
-                        break;
-                  }
-            }
-
-            return $indexFound;
-      }
-
-
-      /**
-       * verify if map exits in maps
-       */
-      public function hasMap(string $method): ?bool
-      {
-            $maps = $this->getMaps();
-
-            $exists = false;
-
-            if (empty($maps)) {
-                  return $exists;
-            }
-
-            foreach ($maps as $map) {
-                  if (!empty($map) && $map->getMethod() === $method) {
-                        $exists = true;
-                        break;
-                  }
-            }
-
-            return $exists;
       }
 }

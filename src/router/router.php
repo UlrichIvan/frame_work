@@ -55,13 +55,13 @@ class Router implements RouterInterface
 
                   if (!empty($args[2])) {
 
-                        $this->addRoutes(strtoupper($method), $args[0], $args[2]);
+                        $this->addRoute(strtoupper($method), $args[0], $args[2]);
 
                         $this->addMiddlewareToMap(strtoupper($method), $args[0], $args[1]);
 
                         return $this;
                   } else {
-                        return $this->addRoutes(strtoupper($method), $args[0], $args[1]);
+                        return $this->addRoute(strtoupper($method), $args[0], $args[1]);
                   }
             } catch (RouterException $e) {
                   die($e->getMessage());
@@ -83,7 +83,7 @@ class Router implements RouterInterface
 
                   // if route not exists create it and add new map
                   if (!$this->routes->has($uri)) {
-                        $this->routes->add($uri, new Route(new ArrayMap(), new ArrayMap(new Map($method, null, new ArrayMap($middleware)))));
+                        $this->routes->add($uri, new Route(new ArrayMap(), new ArrayMap([new Map($method, null, new ArrayMap([$middleware]))])));
                         return $this;
                   }
 
@@ -94,7 +94,7 @@ class Router implements RouterInterface
                   $maps = $route->getMaps();
 
                   // add new middleware
-                  $maps->append(new Map($method, null, new ArrayMap($middleware)));
+                  $maps->append(new Map($method, null, new ArrayMap([$middleware])));
 
                   // set updated maps
                   $route->setMaps($maps);
@@ -111,7 +111,7 @@ class Router implements RouterInterface
       /**
        * add new routes and action inside of routes mapped property
        */
-      public function  addRoutes(string $method, string $route, \Closure $action): ?self
+      public function  addRoute(string $method, string $route, \Closure $action): ?self
       {
             try {
                   // clean uri
@@ -123,6 +123,20 @@ class Router implements RouterInterface
                         return $this;
                   }
 
+                  $route = $this->routes->get($uri);
+
+                  if (!$route->hasMap($method)) {
+
+                        $maps = $route->getMaps();
+
+                        $maps->append(new Map($method, $action));
+
+                        $route->setMaps($maps);
+
+                        $this->routes->add($uri, $route);
+
+                        return $this;
+                  }
                   throw new RouteException("Unable to duplicate route " . $route, 1);
             } catch (RouteException $e) {
                   die($e->getMessage());

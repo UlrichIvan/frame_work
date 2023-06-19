@@ -3,7 +3,7 @@
   "description": "revision composer",
   "license": "MIT",
   "scripts": {
-    "tests": "./vendor/bin/phpunit tests --display-warnings"
+    "tests": "./vendor/bin/phpunit tests --colors always"
   },
   "autoload": {
     "psr-4": {

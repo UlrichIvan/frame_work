@@ -16,7 +16,7 @@ interface RouterInterface
       /**
        * add new routes and action inside of routes mapped property
        */
-      public function  addRoutes(string $method, string $route, \Closure $action): ?self;
+      public function  addRoute(string $method, string $route, \Closure $action): ?self;
 
 
       /**
