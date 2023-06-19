@@ -11,24 +11,7 @@ interface RouterInterface
       /** 
        *    list of methods supported
        */
-      const SUPPORTED_METHODS = ["GET", "POST", "UPDATE", "PATCH", "DELETE", "PUT"];
-
-      /**
-       * add new routes and action inside of routes mapped property
-       */
-      public function  addRoute(string $method, string $route, \Closure $action): ?self;
-
-
-      /**
-       * Add middleware to signle route
-       */
-      public function addMiddlewareToMap(string $method, string $route, \Closure $middleware): ?self;
-
-
-      /**
-       * Add global middleware to route
-       */
-      public function addMiddleware(string $route, \Closure $middleware): ?self;
+      const SUPPORTED_METHODS = ["get", "post", "update", "path", "delete", "put"];
 
       /**
        * return the clean uri value
@@ -36,12 +19,7 @@ interface RouterInterface
       public function clearUri(string $uri): string;
 
       /**
-       * Get middlewares of route assoc to uri paramter
+       * set callback to retrive data entry from incoming request
        */
-      public function getMiddleWares(string $uri): ?array;
-
-      /**
-       * Get maps of route assoc to uri paramter
-       */
-      public function getMaps(string $uri): ?array;
+      public function accept(string $uri, \Closure $cb): self;
 }
