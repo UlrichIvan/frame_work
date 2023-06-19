@@ -8,6 +8,7 @@ require(__DIR__ . "/../vendor/autoload.php");
 
 $router = new Router();
 
+// var_dump($router->request->getHttpValues());
 // init accepts values
 
 // $router->accept("/", function (Request $req, Response $res) {
@@ -28,10 +29,49 @@ $router->get("/", function (Request $req, Response $res) {
       $req->fillQuery();
 });
 
-$router->post("/", function (Request $req, Response $res) {
-      $res->json($req->getBody());
+$router->put("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
 }, function (Request $req, Response $res) {
       $req->fillBody();
+      $req->fillQuery();
+});
+
+$router->patch("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+}, function (Request $req, Response $res) {
+      $req->fillBody();
+      $req->fillQuery();
+});
+
+$router->delete("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+}, function (Request $req, Response $res) {
+      $req->fillBody();
+      $req->fillQuery();
+});
+
+$router->head("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+}, function (Request $req, Response $res) {
+      $req->fillBody();
+      $req->fillQuery();
+});
+
+
+$router->update("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+}, function (Request $req, Response $res) {
+      $req->fillBody();
+      $req->fillQuery();
+});
+
+
+
+$router->post("/", function (Request $req, Response $res) {
+      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+}, function (Request $req, Response $res) {
+      $req->fillBody();
+      $req->fillQuery();
 });
 
 

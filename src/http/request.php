@@ -48,7 +48,34 @@ class Request implements RequestInterface
                         $this->setBodyValue($key, $value);
                   }
             }
+
+            if (in_array($this->get("request", "method"), ["PUT", "PATCH", "DELETE"])) {
+
+                  $putdata = $this->getInputData();
+
+                  foreach ($putdata as $key => $value) {
+                        $this->setBodyValue($key, $value);
+                  }
+            }
+
             return $this;
+      }
+
+      private function getInputData(): array
+      {
+            $putdata = fopen("php://input", "r");
+
+            $result = "";
+
+            while ($data = fread($putdata, 1024)) {
+                  $result .= $data;
+            }
+
+            fclose($putdata);
+
+            parse_str($result, $vars);
+
+            return $vars;
       }
 
       /**

@@ -11,7 +11,7 @@ interface RouterInterface
       /** 
        *    list of methods supported
        */
-      const SUPPORTED_METHODS = ["get", "post", "update", "path", "delete", "put"];
+      const SUPPORTED_METHODS = ["get", "post", "update", "patch", "delete", "put", "head"];
 
       /**
        * return the clean uri value
