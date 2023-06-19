@@ -77,7 +77,7 @@ class Request implements RequestInterface
        */
       public function getBodyValue(string $key): ?string
       {
-            return $this->body[$key];
+            return !empty($this->body[$key]) ? $this->body[$key] : null;
       }
 
       /**
@@ -85,7 +85,7 @@ class Request implements RequestInterface
        */
       public function get(string $requestKey, string $keyValue): ?string
       {
-            return $this->httpValues[$requestKey][$keyValue];
+            return !empty($this->httpValues[$requestKey][$keyValue]) ? $this->httpValues[$requestKey][$keyValue] : null;
       }
 
       /** 
@@ -101,6 +101,9 @@ class Request implements RequestInterface
             return false;
       }
 
+      /**
+       * set all values request from incoming request
+       */
       public function setRequestValues(array $server): void
       {
             foreach ($server as $key => $item) {
@@ -146,9 +149,9 @@ class Request implements RequestInterface
       /**
        * Get the value of query
        */
-      public function getQueryValue(string $key): ?array
+      public function getQueryValue(string $key): ?string
       {
-            return $this->query[$key];
+            return !empty($this->query[$key]) ? $this->query[$key] : null;
       }
 
 
@@ -176,6 +179,11 @@ class Request implements RequestInterface
             return $this;
       }
 
+
+
+      /**
+       * retrun the uri without query string
+       */
       public function getUri(): ?string
       {
             $query_string = $this->get("request", "query");

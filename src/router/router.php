@@ -9,7 +9,6 @@ use App\Http\Response;
 use App\interface\RouterInterface;
 use App\Routes\Route;
 use App\Types\ArrayMap;
-use App\Types\Map;
 use InvalidArgumentException;
 use Closure;
 use Error;
@@ -131,7 +130,7 @@ class Router implements RouterInterface
       }
 
 
-      public function run(): void
+      public function ready(): void
       {
             $request_method = $this->request->getRequestValue('method');
 
