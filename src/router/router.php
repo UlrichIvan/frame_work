@@ -50,7 +50,7 @@ class Router implements RouterInterface
       }
 
 
-      public function __call(string $method, array $params): mixed
+      public function __call(string $method, array $params)
       {
             try {
                   // only supported methods accepted
@@ -97,7 +97,7 @@ class Router implements RouterInterface
       /**
        * add new routes and action inside of routes mapped property
        */
-      private function addRoute(string $method, string $uri, \Closure $action, array | Closure $middlewares): ?self
+      private function addRoute(string $method, string $uri, Closure $action, array | Closure $middlewares): ?self
       {
             try {
                   // clean uri
@@ -109,7 +109,7 @@ class Router implements RouterInterface
                   }
 
                   // create new route with properties
-                  $route = new Route($uri, $method, (is_callable($middlewares) ? [$middlewares] : $middlewares), $action);
+                  $route = new Route($uri, $method, (is_callable($middlewares) ? [$middlewares] : [...$middlewares]), $action);
 
                   // add new route
                   $this->routes->append($route);
@@ -128,38 +128,50 @@ class Router implements RouterInterface
       {
             return rtrim($uri, $uri === '/' ? '' : '/');
       }
-
-
-      public function ready(): void
+      /**
+       * get the route associate to method and uri
+       */
+      private function getRoute(string $method, string $uri): ?Route
       {
-            $request_method = $this->request->getRequestValue('method');
+            $route = null;
 
-            $request_uri =   rtrim($this->request->getUri(), $this->request->getUri() === "/" ? "" : "/");
+            foreach ($this->routes as $_route) {
+                  if ($_route->getMethod() === $method && $_route->getUri() === $uri) {
+                        $route = $_route;
+                        break;
+                  }
+            }
+
+            return $route;
+      }
+
+
+      public function ready()
+      {
+            // get method from incoming resquest
+            $request_method = strtolower($this->request->getRequestValue('method'));
+
+            // get uri from incoming method
+            $request_uri = $this->clearUri($this->request->getUri());
 
             try {
                   if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
-                        throw new RouterException(sprintf("Unexisting method $request_method call on %s ", Router::class));
+                        throw new RouterException(sprintf("Unsupported method '" . $request_method . "' from request send"));
                   }
 
-                  // get all maps associate to current uri
-                  $maps = $this->getMaps($request_uri);
+                  // get route associate to uri and method from incoming request 
+                  $route = $this->getRoute($request_method, $request_uri);
+
+                  if (empty($route)) {
+                        return $this->response->setStatus(404)->close();
+                  }
+
 
                   // get all middlewares associate to current uri
-                  $middlewares = $this->getMiddleWares($request_uri);
+                  $middlewares = [...$this->getAccept($request_uri), ...$route->getMiddlewares()];
 
-                  $routeMapped = null;
-
-                  $routesMiddlewares = [];
-
-                  // if maps is empty close request with 404 header method
-                  if (empty($maps)) {
-                        http_response_code(404);
-                        exit;
-                  }
-
-
-                  // call all middlewares 
-                  if (is_array($middlewares) && !empty($middlewares)) {
+                  // first time,call all middlewares 
+                  if (!empty($middlewares) && is_array($middlewares)) {
                         foreach ($middlewares as $middleware) {
                               if (is_callable($middleware)) {
                                     call_user_func($middleware, $this->request, $this->response);
@@ -167,30 +179,7 @@ class Router implements RouterInterface
                         }
                   }
 
-                  // match corresponding map
-                  foreach ($maps as $map) {
-                        if ($map['method'] === $request_method) {
-                              $routeMapped = (object) $map;
-                              $routesMiddlewares = $map["middlewares"] ?? [];
-                              break;
-                        }
-                  }
-
-                  if (!empty($routeMapped) && empty($routesMiddlewares)) {
-                        call_user_func($routeMapped->action, $this->request, $this->response);
-                        exit;
-                  } elseif (!empty($routeMapped) && !empty($routesMiddlewares)) {
-                        foreach ($routesMiddlewares as $middleware) {
-                              if (is_callable($middleware)) {
-                                    call_user_func($middleware, $this->request, $this->response);
-                              }
-                        }
-                        call_user_func($routeMapped->action, $this->request, $this->response);
-                        exit;
-                  } else {
-                        http_response_code(404);
-                        exit;
-                  }
+                  call_user_func($route->getAction(), $this->request, $this->response);
             } catch (\Throwable $th) {
                   throw $th;
             }
@@ -235,6 +224,14 @@ class Router implements RouterInterface
             $this->accepts = $accepts;
 
             return $this;
+      }
+
+      /**
+       * return the accept callback associate to uri
+       */
+      public function getAccept(string $uri): array
+      {
+            return $this->accepts->has($uri) ? $this->accepts->get($uri) : [];
       }
 
       public function accept(string $uri, Closure $cb): self

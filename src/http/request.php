@@ -26,7 +26,7 @@ class Request implements RequestInterface
             $this->setRequestValues($_SERVER);
       }
 
-      public function __call($name, $arguments): mixed
+      public function __call($name, $arguments)
       {
             if (preg_match("#^hasContentType#", $name, $matched)) {
                   $contentType = str_replace($matched[0], "", $name);

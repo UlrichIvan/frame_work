@@ -20,7 +20,7 @@ class Route implements RouteInterface
       /** 
        * array of callbacks functions or callback function call before action of route
        */
-      private  array|Closure $middlewares;
+      private  array $middlewares = [];
 
 
       /**
@@ -29,7 +29,7 @@ class Route implements RouteInterface
       private Closure $action;
 
 
-      public function __construct(string $uri, string $method, array |Closure $middlewares, Closure $action)
+      public function __construct(string $uri, string $method, array $middlewares, Closure $action)
       {
             $this->setUri($uri);
             $this->setMethod($method);
@@ -80,7 +80,7 @@ class Route implements RouteInterface
       /**
        * Get array of callback functions call before action of route
        */
-      public function getMiddlewares(): array | Closure
+      public function getMiddlewares(): array
       {
             return $this->middlewares;
       }
@@ -98,7 +98,7 @@ class Route implements RouteInterface
       }
 
       /**
-       * Get callback function call at the last time of route
+       * Get callback function call at the last time of request
        */
       public function getAction(): Closure
       {
@@ -106,7 +106,7 @@ class Route implements RouteInterface
       }
 
       /**
-       * Set callback function call at the last time of route
+       * Set callback function call at the last time of request
        *
        * @return  self
        */

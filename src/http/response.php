@@ -28,7 +28,7 @@ class Response implements ResponseInterface
 
       public function getStatus(): ?int
       {
-            return $this->status;
+            return !empty($this->status) ? $this->status : null;
       }
 
       public function setStatusText(int $statusText = null): self
@@ -39,7 +39,7 @@ class Response implements ResponseInterface
 
       public function getStatusText(): ?string
       {
-            return $this->statusText;
+            return !empty($this->statusText) ? $this->statusText : null;
       }
 
       public function json(mixed $data): ?self

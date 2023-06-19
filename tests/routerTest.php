@@ -9,6 +9,7 @@ use App\Routes\Route;
 use App\Types\ArrayMap;
 use PHPUnit\Framework\TestCase;
 
+
 final class RouterTest extends TestCase
 {
       public function testRouterConstructor()
