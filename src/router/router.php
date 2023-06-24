@@ -131,7 +131,7 @@ class Router implements RouterInterface
       /**
        * get the route associate to method and uri
        */
-      private function getRoute(string $method, string $uri): ?Route
+      public function getRoute(string $method, string $uri): ?Route
       {
             $route = null;
 
@@ -143,46 +143,6 @@ class Router implements RouterInterface
             }
 
             return $route;
-      }
-
-
-      public function ready()
-      {
-            // get method from incoming resquest
-            $request_method = strtolower($this->request->getRequestValue('method'));
-
-            // get uri from incoming method
-            $request_uri = $this->clearUri($this->request->getUri());
-
-            try {
-                  if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
-                        throw new RouterException(sprintf("Unsupported method '" . $request_method . "' from request send"));
-                  }
-
-                  // get route associate to uri and method from incoming request 
-                  $route = $this->getRoute($request_method, $request_uri);
-
-                  if (empty($route)) {
-                        return $this->response->setStatus(404)->close();
-                  }
-
-
-                  // get all middlewares associate to current uri
-                  $middlewares = [...$this->getAccept($request_uri), ...$route->getMiddlewares()];
-
-                  // first time,call all middlewares 
-                  if (!empty($middlewares) && is_array($middlewares)) {
-                        foreach ($middlewares as $middleware) {
-                              if (is_callable($middleware)) {
-                                    call_user_func($middleware, $this->request, $this->response);
-                              }
-                        }
-                  }
-
-                  call_user_func($route->getAction(), $this->request, $this->response);
-            } catch (\Throwable $th) {
-                  throw $th;
-            }
       }
 
       /**
@@ -234,15 +194,58 @@ class Router implements RouterInterface
             return $this->accepts->has($uri) ? $this->accepts->get($uri) : [];
       }
 
-      public function accept(string $uri, Closure $cb): self
+      public function accept(string $uri, Closure |array $cb): self
       {
             if ($this->accepts->has($uri)) {
+
                   $accepted = $this->accepts->get($uri);
-                  $this->accepts->add($uri, [...$accepted, $cb]);
+
+                  $this->accepts->add($uri, is_callable($cb) ? [...$accepted, $cb] : [...$accepted, ...$cb]);
+
                   return $this;
             }
-            $this->accepts->add($uri, [$cb]);
+
+            $this->accepts->add($uri, is_callable($cb) ? [$cb] : [...$cb]);
 
             return $this;
+      }
+
+      public function ready()
+      {
+            // get method from incoming resquest
+            $request_method = strtolower($this->request->getRequestValue('method'));
+
+            // get uri from incoming method
+            $request_uri = $this->clearUri($this->request->getUri());
+
+            try {
+                  if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
+                        throw new RouterException(sprintf("Unsupported method '" . $request_method . "' from request send"));
+                  }
+
+                  // get route associate to uri and method from incoming request 
+                  $route = $this->getRoute($request_method, $request_uri);
+
+                  if (empty($route)) {
+                        return $this->response->setStatus(404)->close();
+                  }
+
+
+                  // get all middlewares associate to current uri
+                  $middlewares = [...$this->getAccept($request_uri), ...$route->getMiddlewares()];
+
+                  // first time,call all middlewares 
+                  if (!empty($middlewares) && is_array($middlewares)) {
+                        foreach ($middlewares as $middleware) {
+                              if (is_callable($middleware)) {
+                                    call_user_func($middleware, $this->request, $this->response);
+                              }
+                        }
+                  }
+
+                  call_user_func($route->getAction(), $this->request, $this->response);
+            } catch (\Throwable $th) {
+                  throw $th;
+            }
       }
 }

@@ -79,7 +79,7 @@ class Request implements RequestInterface
       }
 
       /**
-       * Set queries request value from incoming request which only has application/json value from content-type 
+       * Set queries request value from incoming request
        */
       public function fillQuery(): ?self
       {
@@ -115,12 +115,34 @@ class Request implements RequestInterface
             return !empty($this->httpValues[$requestKey][$keyValue]) ? $this->httpValues[$requestKey][$keyValue] : null;
       }
 
+      /**
+       * Get a specific value associate to key value
+       */
+      public function getPropertyValue(string $key): mixed
+      {
+            return !empty($this->$key) ? $this->$key : null;
+      }
+
+      /**
+       * add value in request object 
+       */
+      public function add(string $key, mixed $value): ?self
+      {
+            if (empty($this->$key)) {
+                  $this->$key = $value;
+            }
+
+            $this->$key = $value;
+
+            return $this;
+      }
+
+
       /** 
        * Verify if request has a specific content type required by application
        */
       public function hasContentType(string $type): bool
       {
-            // $contentType = $this->get("http", "content_type");
 
             if (Request::CONTENT_TYPE_URL_ENCODED === "application/x-www-form-" . $type) {
                   return true;

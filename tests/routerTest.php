@@ -22,6 +22,45 @@ final class RouterTest extends TestCase
             $this->assertEmpty($router->getRoutes());
       }
 
+      public function testAddGlobalMiddleware()
+      {
+            $router = new Router();
+
+            // add middlewares
+            $router->accept("/", [function () {
+                  // do something...
+            }, function () {
+                  // do something...
+            }]);
+
+
+            $this->assertNotEmpty($router->getAccepts());
+            $this->assertCount(2, $router->getAccept("/"));
+            $this->assertIsCallable($router->getAccept("/")[0]);
+            $this->assertIsCallable($router->getAccept("/")[1]);
+      }
+
+      public function testAddMiddlewareToRoute()
+      {
+            $router = new Router();
+
+            $router->post(
+                  "/",
+                  function (Request $req, Response $res) {
+                        $res->json(["body" => $req->getBody()]);
+                  },
+                  function () {
+                  }
+            );
+
+            $route = $router->getRoute("post", "/");
+
+            $this->assertCount(0, $router->getAccept("/"));
+            $this->assertInstanceOf(Route::class, $route);
+            $this->assertCount(1, $route->getMiddlewares());
+            $this->assertIsCallable($route->getMiddlewares()[0]);
+      }
+
       public function testAddRouteWithoutMiddlewares()
       {
             $router = new Router();
@@ -30,7 +69,7 @@ final class RouterTest extends TestCase
                   // do something...
             });
 
-            $route = $router->getRoutes()[0];
+            $route = $router->getRoute("post", "/");
 
             $this->assertInstanceOf(Route::class, $route);
             $this->assertSame($route->getMethod(), "post");
@@ -57,7 +96,7 @@ final class RouterTest extends TestCase
             $this->assertIsCallable($route->getMiddlewares()[0]);
       }
 
-      public function testAddRouteWithArrayOfMiddlewares()
+      public function testAddRouteWithArrayMiddlewares()
       {
             $router = new Router();
 
@@ -76,6 +115,7 @@ final class RouterTest extends TestCase
             $this->assertSame($route->getUri(), "/");
             $this->assertCount(2, $route->getMiddlewares());
             $this->assertIsCallable($route->getMiddlewares()[0]);
+            $this->assertIsCallable($route->getMiddlewares()[1]);
       }
 
       public function testAddManyRoute()
@@ -92,17 +132,21 @@ final class RouterTest extends TestCase
 
             $routes = $router->getRoutes();
 
+            $this->assertCount(2, $routes);
+
+            // instances
             $this->assertInstanceOf(Route::class, $routes[0]);
             $this->assertInstanceOf(Route::class, $routes[1]);
 
+            // methods
             $this->assertSame($routes[0]->getMethod(), "post");
             $this->assertSame($routes[1]->getMethod(), "get");
 
+            // uri from each route
             $this->assertSame($routes[0]->getUri(), "/");
             $this->assertSame($routes[1]->getUri(), "/post");
 
-            $this->assertCount(2, $routes);
-
+            // action from each route
             $this->assertIsCallable($routes[0]->getAction());
             $this->assertIsCallable($routes[1]->getAction());
       }
@@ -126,19 +170,17 @@ final class RouterTest extends TestCase
       }
 
 
-      public function testAccept()
-      {
-            $router = new Router();
+      // public function testMethodRequest()
+      // {
+      //       $router = new Router();
 
-            $router->accept("/", function () {
-                  // do something...
-            });
+      //       $router->post("/", function (Request $req, Response $res) {
+      //             $res->json(["body" => $req->getBody()]);
+      //       });
 
-            $router->accept("/post", function () {
-                  // do something...
-            });
+      //       $this->assertTrue($router->hasRoute("post", "/"));
+      // }
 
-            $this->assertNotEmpty($router->getAccepts());
-            $this->assertCount(2, $router->getAccepts());
-      }
+
+
 }

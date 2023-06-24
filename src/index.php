@@ -68,7 +68,7 @@ $router->update("/", function (Request $req, Response $res) {
 
 
 $router->post("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
+      $res->json(["body" => $req->getBody()]);
 }, function (Request $req, Response $res) {
       $req->fillBody();
       $req->fillQuery();

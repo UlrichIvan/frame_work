@@ -11,10 +11,12 @@ final class RequestTest extends TestCase
       {
             $request = new Request();
 
-            $httpValues = (object) $request->getHttpValues();
+            $httpValues = $request->getHttpValues();
 
             $this->assertNotEmpty($httpValues);
+            $this->assertIsArray($httpValues);
       }
+
 
       public function testSetAndQueryValue()
       {
@@ -23,5 +25,15 @@ final class RequestTest extends TestCase
             $request->setQueryValue("type", "test");
 
             $this->assertSame("test", $request->getQueryValue("type"));
+      }
+
+
+      public function testAddAndGetPropertyValue()
+      {
+            $request = new Request();
+
+            $request->add("name", "test");
+
+            $this->assertSame("test", $request->getPropertyValue("name"));
       }
 }
