@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Exception;
+namespace App\Core\Exception;
 
 use Exception;
 
-class RouteException extends Exception
+class RouterException extends Exception
 {
       public function __consttuct($message = "", $code = 1)
       {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http;
+namespace App\Core\Http;
 
-use App\interface\ResponseInterface;
+use App\Core\interface\ResponseInterface;
 
 /**
  * Class Response to send response from entry request
@@ -46,7 +46,7 @@ class Response implements ResponseInterface
       {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode($data);
-
+            $this->close();
             return $this;
       }
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Router;
+namespace App\Core\Router;
 
-use App\Exception\RouteException;
-use App\Exception\RouterException;
-use App\Http\Request;
-use App\Http\Response;
-use App\interface\RouterInterface;
-use App\Routes\Route;
-use App\Types\ArrayMap;
+use App\Core\Exception\RouteException;
+use App\Core\Exception\RouterException;
+use App\Core\Http\Request;
+use App\Core\Http\Response;
+use App\Core\interface\RouterInterface;
+use App\Core\Routes\Route;
+use App\Core\Types\ArrayMap;
 use InvalidArgumentException;
 use Closure;
 use Error;
@@ -46,7 +46,7 @@ class Router implements RouterInterface
 
             $this->setRoutes(new ArrayMap());
 
-            $this->setBefore(new ArrayMap());
+            $this->setBefores(new ArrayMap());
       }
 
 
@@ -232,7 +232,7 @@ class Router implements RouterInterface
 
 
                   // get all middlewares associate to current uri
-                  $middlewares = [...$this->getAccept($request_uri), ...$route->getMiddlewares()];
+                  $middlewares = [...$this->getBefore($request_uri), ...$route->getMiddlewares()];
 
                   // first time,call all middlewares 
                   if (!empty($middlewares) && is_array($middlewares)) {

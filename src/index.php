@@ -8,18 +8,23 @@ require(__DIR__ . "/../vendor/autoload.php");
 
 $router = new Router();
 
-// var_dump($router->request->getHttpValues());
-// init accepts values
+// init before action attach to specific route
 
-// $router->accept("/", function (Request $req, Response $res) {
-//       if ($req->get("request", "method") === "POST") {
-//             $req->fillBody();
-//       }
+// http://localhost:4000/api/users/create
 
-//       if ($req->get("request", "method") === "GET") {
-//             $req->fillQuery();
-//       }
-// });
+/**
+ * App::For("/api/users")->call(router)
+ */
+
+$router->before("/api/users/", function (Request $req, Response $res) {
+      if ($req->get("request", "method") === "POST") {
+            $req->fillBody();
+      }
+
+      if ($req->get("request", "method") === "GET") {
+            $req->fillQuery();
+      }
+});
 
 // init routes
 
@@ -32,9 +37,6 @@ $router->get("/", function (Request $req, Response $res) {
 
 $router->post("/", function (Request $req, Response $res) {
       $res->json(["body" => $req->getBody()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
 });
 
 

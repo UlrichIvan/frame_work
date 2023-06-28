@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Types;
+namespace App\Core\Types;
 
-use App\interface\ArrayMapInterface;
+use App\Core\interface\ArrayMapInterface;
 
 class ArrayMap extends \ArrayObject implements ArrayMapInterface
 {
