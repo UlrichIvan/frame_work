@@ -21,5 +21,5 @@ interface RouterInterface
       /**
        * set callback to retrive data entry from incoming request
        */
-      public function accept(string $uri, \Closure $cb): self;
+      public function before(string $uri, \Closure $cb): self;
 }

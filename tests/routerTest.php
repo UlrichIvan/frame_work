@@ -169,18 +169,19 @@ final class RouterTest extends TestCase
             $this->assertSame("/post", $router->clearUri("/post/"));
       }
 
+      public function getMockRequest()
+      {
+            $mock = $this->createMock(Request::class);
+            $mock->method("run")->will;
+      }
+      public function testMethodRequest()
+      {
+            $router = new Router();
 
-      // public function testMethodRequest()
-      // {
-      //       $router = new Router();
+            $router->post("/", function (Request $req, Response $res) {
+                  $res->json(["body" => $req->getBody()]);
+            });
 
-      //       $router->post("/", function (Request $req, Response $res) {
-      //             $res->json(["body" => $req->getBody()]);
-      //       });
-
-      //       $this->assertTrue($router->hasRoute("post", "/"));
-      // }
-
-
-
+            $this->assertTrue($router->hasRoute("post", "/"));
+      }
 }

@@ -116,7 +116,7 @@ class Request implements RequestInterface
       }
 
       /**
-       * Get a specific value associate to key value
+       * Get value request associate to key value
        */
       public function getPropertyValue(string $key): mixed
       {

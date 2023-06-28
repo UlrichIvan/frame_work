@@ -21,7 +21,7 @@ class Router implements RouterInterface
       /**
        * content global callback from each route
        */
-      private ArrayMap $accepts;
+      private ArrayMap $befores;
 
       /**   
        * contents routes with mapping actions
@@ -46,7 +46,7 @@ class Router implements RouterInterface
 
             $this->setRoutes(new ArrayMap());
 
-            $this->setAccepts(new ArrayMap());
+            $this->setBefore(new ArrayMap());
       }
 
 
@@ -167,21 +167,21 @@ class Router implements RouterInterface
       }
 
       /**
-       * Get the value of accepts
+       * Get the value of befores
        */
-      public function getAccepts()
+      public function getBefores()
       {
-            return $this->accepts;
+            return $this->befores;
       }
 
       /**
-       * Set the value of accepts
+       * Set the value of befores
        *
        * @return  self
        */
-      public function setAccepts(ArrayMap $accepts): self
+      public function setBefores(ArrayMap $befores): self
       {
-            $this->accepts = $accepts;
+            $this->befores = $befores;
 
             return $this;
       }
@@ -189,23 +189,23 @@ class Router implements RouterInterface
       /**
        * return the accept callback associate to uri
        */
-      public function getAccept(string $uri): array
+      public function getBefore(string $uri): array
       {
-            return $this->accepts->has($uri) ? $this->accepts->get($uri) : [];
+            return $this->befores->has($uri) ? $this->befores->get($uri) : [];
       }
 
-      public function accept(string $uri, Closure |array $cb): self
+      public function before(string $uri, Closure|array $cb): self
       {
-            if ($this->accepts->has($uri)) {
+            if ($this->befores->has($uri)) {
 
-                  $accepted = $this->accepts->get($uri);
+                  $befores = $this->befores->get($uri);
 
-                  $this->accepts->add($uri, is_callable($cb) ? [...$accepted, $cb] : [...$accepted, ...$cb]);
+                  $this->befores->add($uri, is_callable($cb) ? [...$befores, $cb] : [...$befores, ...$cb]);
 
                   return $this;
             }
 
-            $this->accepts->add($uri, is_callable($cb) ? [$cb] : [...$cb]);
+            $this->befores->add($uri, is_callable($cb) ? [$cb] : [...$cb]);
 
             return $this;
       }

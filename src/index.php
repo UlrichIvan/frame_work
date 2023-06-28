@@ -29,43 +29,6 @@ $router->get("/", function (Request $req, Response $res) {
       $req->fillQuery();
 });
 
-$router->put("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
-});
-
-$router->patch("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
-});
-
-$router->delete("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
-});
-
-$router->head("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
-});
-
-
-$router->update("/", function (Request $req, Response $res) {
-      $res->json(["body" => $req->getBody(), "query" => $req->getQuery()]);
-}, function (Request $req, Response $res) {
-      $req->fillBody();
-      $req->fillQuery();
-});
-
-
 
 $router->post("/", function (Request $req, Response $res) {
       $res->json(["body" => $req->getBody()]);
