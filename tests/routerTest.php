@@ -2,11 +2,11 @@
 
 namespace App\tests\routers;
 
-use App\Http\Request;
-use App\Http\Response;
-use App\Router\Router;
-use App\Routes\Route;
-use App\Types\ArrayMap;
+use App\Core\Http\Request;
+use App\Core\Http\Response;
+use App\Core\Router\Router;
+use App\Core\Routes\Route;
+use App\Core\Types\ArrayMap;
 use PHPUnit\Framework\TestCase;
 
 

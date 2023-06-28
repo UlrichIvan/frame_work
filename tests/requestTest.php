@@ -2,7 +2,7 @@
 
 namespace App\tests\requests;
 
-use App\Http\Request;
+use App\Core\Http\Request;
 use PHPUnit\Framework\TestCase;
 
 final class RequestTest extends TestCase
