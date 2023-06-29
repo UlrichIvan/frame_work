@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Router;
+namespace App\Routers;
 
 use App\Exception\RouteException;
 use App\Exception\RouterException;
@@ -210,15 +210,15 @@ class Router implements RouterInterface
             return $this;
       }
 
-      public function readyGo()
+
+      public function readyGo(string $uri_from_prefix = "")
       {
-            // get method from incoming resquest
-            $request_method = strtolower($this->request->getRequestValue('method'));
-
-            // get uri from incoming method
-            $request_uri = $this->clearUri($this->request->getUri());
-
             try {
+                  // get method from incoming resquest
+                  $request_method = strtolower($this->request->getRequestValue('method'));
+
+                  // get uri from incoming method
+                  $request_uri = $uri_from_prefix !== "" ? $uri_from_prefix : $this->clearUri($this->request->getUri());
                   if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
                         throw new RouterException(sprintf("Unsupported method '" . $request_method . "' from request send"));
                   }

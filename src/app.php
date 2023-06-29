@@ -2,8 +2,9 @@
 
 namespace App;
 
+use App\Exception\RouterException;
 use App\Types\ArrayMap;
-use App\Router\Router;
+use App\Routers\Router;
 use Closure;
 use InvalidArgumentException;
 
@@ -14,62 +15,39 @@ class App extends Router
 {
       public $name = "App";
 
-      private static ArrayMap $Routers;
+      private ArrayMap $routers;
 
 
       function __construct()
       {
+            $this->routers = new ArrayMap();
             parent::__construct();
       }
 
-      public static function use(string $uri, Closure $cb): self
+      public function use(string $prefix, Closure $cb): self
       {
-            return new self();
-      }
-      public static function run(): void
-      {
+            $this->routers->add($prefix, $cb());
+            return $this;
       }
 
-      public function accept(string $url, Closure $cb): ?self
+
+      public function run()
       {
             try {
-                  if (empty($url) || !is_string($url) || !is_callable($cb)) {
-                        throw new InvalidArgumentException("Invalid arguments set on " . __METHOD__ . " method");
+                  // get uri from incoming method
+                  $request_uri = $this->clearUri($this->request->getUri());
+
+                  // match router associate to prefix
+                  foreach ($this->routers as $prefix => $router) {
+                        if (preg_match("#^" . $prefix . "#", $request_uri, $matched) && !empty($matched)) {
+                              $uri = str_replace($matched[0], "", $request_uri);
+                              $router->readyGo($uri === "" ? "/" : $uri);
+                              break;
+                        }
                   }
-                  $this->addMiddleware($url, $cb);
-                  return $this;
-            } catch (\InvalidArgumentException $e) {
-                  die($e->getMessage());
+                  return $this->response->setStatus(404)->close();
+            } catch (\Throwable $th) {
+                  throw $th;
             }
-      }
-
-
-      public function urlencoded(): Closure
-      {
-            return function () {
-                  if ($this->request->hasContentTypeUrlencoded()) {
-                        $this->request->fillBody()->fillQuery();
-                  }
-            };
-      }
-
-      /**
-       * Get the value of Routers
-       */
-      public function getRouters()
-      {
-            return $this->Routers;
-      }
-
-      /**
-       * Set the value of Routers
-       *
-       * @return  self
-       */
-      public function setRouters($Routers)
-      {
-            $this->Routers = $Routers;
-
-            return $this;
       }
 }

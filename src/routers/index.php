@@ -2,7 +2,7 @@
 
 use App\Http\Request;
 use App\Http\Response;
-use App\Router\Router;
+use App\Routers\Router;
 
 function userRouter(): Router
 {
@@ -16,8 +16,11 @@ function userRouter(): Router
 
       $router->get("/", function (Request $req, Response $res) {
             HomeController($req, $res);
-      }, function (Request $req, Response $res) {
-            $req->fillQuery();
+      });
+
+
+      $router->get("/all", function (Request $req, Response $res) {
+            HomeController($req, $res);
       });
 
 
