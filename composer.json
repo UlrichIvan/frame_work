@@ -3,12 +3,18 @@
   "description": "revision composer",
   "license": "MIT",
   "scripts": {
-    "tests": "./vendor/bin/phpunit tests --colors always"
+    "tests": "./vendor/bin/phpunit tests --colors always",
+    "start": "php -S localhost:4000 -t src/"
   },
   "autoload": {
     "psr-4": {
       "App\\": "src/"
     },
+    "files": [
+      "src/before/index.php",
+      "src/controllers/index.php",
+      "src/routers/index.php"
+    ],
     "classmap": [
       "src"
     ]

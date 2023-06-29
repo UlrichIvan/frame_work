@@ -2,11 +2,11 @@
 
 namespace App\tests\routers;
 
-use App\Core\Http\Request;
-use App\Core\Http\Response;
-use App\Core\Router\Router;
-use App\Core\Routes\Route;
-use App\Core\Types\ArrayMap;
+use App\Http\Request;
+use App\Http\Response;
+use App\Router\Router;
+use App\Routes\Route;
+use App\Types\ArrayMap;
 use PHPUnit\Framework\TestCase;
 
 
@@ -27,17 +27,17 @@ final class RouterTest extends TestCase
             $router = new Router();
 
             // add middlewares
-            $router->accept("/", [function () {
+            $router->before("/", [function () {
                   // do something...
             }, function () {
                   // do something...
             }]);
 
 
-            $this->assertNotEmpty($router->getAccepts());
-            $this->assertCount(2, $router->getAccept("/"));
-            $this->assertIsCallable($router->getAccept("/")[0]);
-            $this->assertIsCallable($router->getAccept("/")[1]);
+            $this->assertNotEmpty($router->getBefores());
+            $this->assertCount(2, $router->getBefore("/"));
+            $this->assertIsCallable($router->getBefore("/")[0]);
+            $this->assertIsCallable($router->getBefore("/")[1]);
       }
 
       public function testAddMiddlewareToRoute()
@@ -55,7 +55,7 @@ final class RouterTest extends TestCase
 
             $route = $router->getRoute("post", "/");
 
-            $this->assertCount(0, $router->getAccept("/"));
+            $this->assertCount(0, $router->getBefore("/"));
             $this->assertInstanceOf(Route::class, $route);
             $this->assertCount(1, $route->getMiddlewares());
             $this->assertIsCallable($route->getMiddlewares()[0]);

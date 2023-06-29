@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Core\Router;
+namespace App\Router;
 
-use App\Core\Exception\RouteException;
-use App\Core\Exception\RouterException;
-use App\Core\Http\Request;
-use App\Core\Http\Response;
-use App\Core\interface\RouterInterface;
-use App\Core\Routes\Route;
-use App\Core\Types\ArrayMap;
+use App\Exception\RouteException;
+use App\Exception\RouterException;
+use App\Http\Request;
+use App\Http\Response;
+use App\interface\RouterInterface;
+use App\Routes\Route;
+use App\Types\ArrayMap;
 use InvalidArgumentException;
 use Closure;
 use Error;
@@ -210,7 +210,7 @@ class Router implements RouterInterface
             return $this;
       }
 
-      public function ready()
+      public function readyGo()
       {
             // get method from incoming resquest
             $request_method = strtolower($this->request->getRequestValue('method'));

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Routes;
+namespace App\Routes;
 
-use App\Core\interface\RouteInterface;
+use App\interface\RouteInterface;
 use Closure;
 
 class Route implements RouteInterface

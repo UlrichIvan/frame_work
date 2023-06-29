@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Http;
+namespace App\Http;
 
-use App\Core\interface\ResponseInterface;
+use App\interface\ResponseInterface;
 
 /**
  * Class Response to send response from entry request

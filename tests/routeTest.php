@@ -2,7 +2,7 @@
 
 namespace App\tests\routes;
 
-use App\Core\Routes\Route;
+use App\Routes\Route;
 use PHPUnit\Framework\TestCase;
 
 final class RouteTest extends TestCase

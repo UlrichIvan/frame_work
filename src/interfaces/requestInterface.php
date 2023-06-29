@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\interface;
+namespace App\interface;
 
 /**  
  * Content all properties and valeurs necessary for Request Object

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Http;
+namespace App\Http;
 
-use App\Core\interface\RequestInterface;
+use App\interface\RequestInterface;
 
 /**
  * Class Request to manage entry request
