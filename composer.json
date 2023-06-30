@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "tests": "./vendor/bin/phpunit tests --colors always",
-    "start": "php -S localhost:4000 -t src/"
+    "start": "php -S localhost:4000"
   },
   "autoload": {
     "psr-4": {
