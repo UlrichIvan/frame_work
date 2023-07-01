@@ -3,6 +3,7 @@
 namespace App\Routes;
 
 use App\interface\RouteInterface;
+use App\Types\ArrayCallable;
 use Closure;
 use InvalidArgumentException;
 
@@ -39,7 +40,7 @@ class Route implements RouteInterface
       {
             $this->setUri($uri);
             $this->setMethod($method);
-            $this->setMiddlewares($middlewares);
+            $this->setMiddlewares(new ArrayCallable($middlewares));
             $this->setAction($action);
             $this->setParamsNames($paramsNames);
       }
@@ -97,19 +98,9 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setMiddlewares(array $middlewares): self
+      public function setMiddlewares(ArrayCallable $middlewares): self
       {
-            try {
-                  foreach ($middlewares as $middleware) {
-                        if (!is_callable($middleware)) {
-                              throw new InvalidArgumentException("Invalid middleware send. all middleware must be a closure", 1);
-                        }
-                  }
-            } catch (\Throwable $th) {
-                  throw $th;
-            }
-
-            $this->middlewares = $middlewares;
+            $this->middlewares = [...$middlewares];
 
             return $this;
       }

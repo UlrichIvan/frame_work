@@ -8,6 +8,7 @@ use App\Http\Request;
 use App\Http\Response;
 use App\interface\RouterInterface;
 use App\Routes\Route;
+use App\Types\ArrayCallable;
 use App\Types\ArrayMap;
 use InvalidArgumentException;
 use Closure;
@@ -60,13 +61,13 @@ class Router implements RouterInterface
 
                   // uri and callback only
                   if (is_string($params[0]) && is_callable($params[1]) && empty($params[2])) {
-                        $this->addRoute($method, $params[0], $params[1], []);
+                        $this->addRoute($method, $params[0], $params[1], new ArrayCallable());
                         return $this;
                   }
 
                   // uri and callback and middlewares
                   if (is_string($params[0]) && is_callable($params[1]) && !empty($params[2]) && (is_callable($params[2]) || is_array($params[2]))) {
-                        $this->addRoute($method, $params[0], $params[1], $params[2]);
+                        $this->addRoute($method, $params[0], $params[1], is_callable($params[2]) ? $params[2] :  new ArrayCallable($params[2]));
                         return $this;
                   }
 
@@ -96,10 +97,11 @@ class Router implements RouterInterface
 
 
 
+
       /**
        * add new routes and action inside of routes mapped property
        */
-      private function addRoute(string $method, string $uri, Closure $action, array | Closure $middlewares): ?self
+      private function addRoute(string $method, string $uri, Closure $action, ArrayCallable | Closure $middlewares): ?self
       {
             try {
                   // get paramsName into uri if they exist
@@ -116,11 +118,12 @@ class Router implements RouterInterface
                   // create new route with properties
                   $route = new Route($uri, $method, (is_callable($middlewares) ? [$middlewares] : [...$middlewares]), $action, $paramsNames);
 
-                  // add new route
                   $this->routes->append($route);
 
                   return $this;
             } catch (RouteException $e) {
+                  die($e->getMessage());
+            } catch (InvalidArgumentException $e) {
                   die($e->getMessage());
             }
       }
@@ -207,16 +210,18 @@ class Router implements RouterInterface
 
       public function before(string $uri, Closure|array $cb): self
       {
+            $callback = is_callable($cb) ? $cb : new ArrayCallable($cb);
+
             if ($this->befores->has($uri)) {
 
                   $befores = $this->befores->get($uri);
 
-                  $this->befores->add($uri, is_callable($cb) ? [...$befores, $cb] : [...$befores, ...$cb]);
+                  $this->befores->add($uri, is_callable($callback) ? [...$befores, $callback] : [...$befores, ...$callback]);
 
                   return $this;
             }
 
-            $this->befores->add($uri, is_callable($cb) ? [$cb] : [...$cb]);
+            $this->befores->add($uri, is_callable($callback) ? [$callback] : [...$callback]);
 
             return $this;
       }

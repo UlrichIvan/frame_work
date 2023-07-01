@@ -23,7 +23,7 @@ final class ArrayCallable extends \ArrayObject implements ArrayCallableInterface
             try {
                   foreach ($cbs as $cb) {
                         if (!is_callable($cb)) {
-                              throw new InvalidArgumentException("Invalid callback set, all elements of array callback must callable", 1);
+                              throw new InvalidArgumentException("Invalid callbacks set,all elements of array callback must be callable", 1);
                         }
                   }
             } catch (\Throwable $th) {

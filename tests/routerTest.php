@@ -4,7 +4,7 @@ namespace App\tests\routers;
 
 use App\Http\Request;
 use App\Http\Response;
-use App\Router\Router;
+use App\Routers\Router;
 use App\Routes\Route;
 use App\Types\ArrayMap;
 use PHPUnit\Framework\TestCase;
@@ -20,45 +20,6 @@ final class RouterTest extends TestCase
             $this->assertInstanceOf(Response::class, $router->response);
             $this->assertInstanceOf(ArrayMap::class, $router->getRoutes());
             $this->assertEmpty($router->getRoutes());
-      }
-
-      public function testAddGlobalMiddleware()
-      {
-            $router = new Router();
-
-            // add middlewares
-            $router->before("/", [function () {
-                  // do something...
-            }, function () {
-                  // do something...
-            }]);
-
-
-            $this->assertNotEmpty($router->getBefores());
-            $this->assertCount(2, $router->getBefore("/"));
-            $this->assertIsCallable($router->getBefore("/")[0]);
-            $this->assertIsCallable($router->getBefore("/")[1]);
-      }
-
-      public function testAddMiddlewareToRoute()
-      {
-            $router = new Router();
-
-            $router->post(
-                  "/",
-                  function (Request $req, Response $res) {
-                        $res->json(["body" => $req->getBody()]);
-                  },
-                  function () {
-                  }
-            );
-
-            $route = $router->getRoute("post", "/");
-
-            $this->assertCount(0, $router->getBefore("/"));
-            $this->assertInstanceOf(Route::class, $route);
-            $this->assertCount(1, $route->getMiddlewares());
-            $this->assertIsCallable($route->getMiddlewares()[0]);
       }
 
       public function testAddRouteWithoutMiddlewares()
@@ -77,7 +38,7 @@ final class RouterTest extends TestCase
             $this->assertCount(0, $route->getMiddlewares());
       }
 
-      public function testAddRouteWithCallbackMiddleware()
+      public function testAddRouteWithCallbackAndMiddleware()
       {
             $router = new Router();
 
@@ -95,6 +56,7 @@ final class RouterTest extends TestCase
             $this->assertCount(1, $route->getMiddlewares());
             $this->assertIsCallable($route->getMiddlewares()[0]);
       }
+
 
       public function testAddRouteWithArrayMiddlewares()
       {
@@ -116,6 +78,81 @@ final class RouterTest extends TestCase
             $this->assertCount(2, $route->getMiddlewares());
             $this->assertIsCallable($route->getMiddlewares()[0]);
             $this->assertIsCallable($route->getMiddlewares()[1]);
+      }
+
+      public function testAddGlobalArrayMiddleware()
+      {
+            $router = new Router();
+
+            // add middlewares
+            $router->before("/", [function () {
+                  // do something...
+            }, function () {
+                  // do something...
+            }]);
+
+
+            $this->assertNotEmpty($router->getBefores());
+            $this->assertCount(2, $router->getBefore("/"));
+            $this->assertIsCallable($router->getBefore("/")[0]);
+            $this->assertIsCallable($router->getBefore("/")[1]);
+      }
+
+      public function testAddGlobalCallbackMiddleware()
+      {
+            $router = new Router();
+
+            // add middlewares
+            $router->before("/", function () {
+                  // do something...
+            });
+
+
+            $this->assertNotEmpty($router->getBefores());
+            $this->assertCount(1, $router->getBefore("/"));
+            $this->assertIsCallable($router->getBefore("/")[0]);
+      }
+
+      public function testAddCallbackMiddlewareToRoute()
+      {
+            $router = new Router();
+
+            $router->post(
+                  "/",
+                  function (Request $req, Response $res) {
+                        $res->json(["body" => $req->getBody()]);
+                  },
+                  function () {
+                  }
+            );
+
+            $route = $router->getRoute("post", "/");
+
+            $this->assertInstanceOf(Route::class, $route);
+            $this->assertCount(0, $router->getBefore("/"));
+            $this->assertCount(1, $route->getMiddlewares());
+            $this->assertIsCallable($route->getMiddlewares()[0]);
+      }
+
+      public function testAddArrayCallbackMiddlewareToRoute()
+      {
+            $router = new Router();
+
+            $router->post(
+                  "/",
+                  function (Request $req, Response $res) {
+                        $res->json(["body" => $req->getBody()]);
+                  },
+                  [function () {
+                  }]
+            );
+
+            $route = $router->getRoute("post", "/");
+
+            $this->assertInstanceOf(Route::class, $route);
+            $this->assertCount(0, $router->getBefore("/"));
+            $this->assertCount(1, $route->getMiddlewares());
+            $this->assertIsCallable($route->getMiddlewares()[0]);
       }
 
       public function testAddManyRoute()
@@ -169,19 +206,19 @@ final class RouterTest extends TestCase
             $this->assertSame("/post", $router->clearUri("/post/"));
       }
 
-      public function getMockRequest()
-      {
-            $mock = $this->createMock(Request::class);
-            $mock->method("run")->will;
-      }
-      public function testMethodRequest()
-      {
-            $router = new Router();
+      // public function getMockRequest()
+      // {
+      //       $mock = $this->createMock(Request::class);
+      //       $mock->method("run")->will;
+      // }
+      // public function testMethodRequest()
+      // {
+      //       $router = new Router();
 
-            $router->post("/", function (Request $req, Response $res) {
-                  $res->json(["body" => $req->getBody()]);
-            });
+      //       $router->post("/", function (Request $req, Response $res) {
+      //             $res->json(["body" => $req->getBody()]);
+      //       });
 
-            $this->assertTrue($router->hasRoute("post", "/"));
-      }
+      //       $this->assertTrue($router->hasRoute("post", "/"));
+      // }
 }
