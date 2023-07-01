@@ -85,7 +85,7 @@ class App extends Router
                               break;
                         }
                   }
-                  return $this->response->setStatus(404)->close();
+                  return $this->response->status(404)->close();
             } catch (\Throwable $th) {
                   throw $th;
             }

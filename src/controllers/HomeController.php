@@ -7,5 +7,5 @@ function HomeController(Request $req, Response $res)
 {
       $req->fillQuery();
 
-      $res->setStatus(200)->setHeader("Content-Type:", "application/json; charset=utf-8")->json($req->getQuery());
+      $res->status(200)->header("Content-Type:", "application/json; charset=utf-8")->json($req->getQuery());
 }

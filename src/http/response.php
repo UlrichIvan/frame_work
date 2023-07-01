@@ -12,7 +12,7 @@ class Response implements ResponseInterface
       private int $status;
       private string $statusText;
 
-      public function setStatus(int $status): ?self
+      public function status(int $status): ?self
       {
             try {
                   if (!in_array($status, Response::HTTP_CODE_RESPONSES)) {
@@ -54,7 +54,7 @@ class Response implements ResponseInterface
             exit;
       }
 
-      public function setHeader(string $responseName, string $content): self
+      public function header(string $responseName, string $content): self
       {
             header(`{$responseName}: {$content}`);
             return $this;
