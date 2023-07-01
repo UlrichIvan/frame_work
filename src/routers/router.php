@@ -94,12 +94,17 @@ class Router implements RouterInterface
             return $exists;
       }
 
+
+
       /**
        * add new routes and action inside of routes mapped property
        */
       private function addRoute(string $method, string $uri, Closure $action, array | Closure $middlewares): ?self
       {
             try {
+                  // get paramsName into uri if they exist
+                  $paramsNames = $this->request->hasParamsNames($uri) ? $this->request->getParamsNamesIntoUri($uri) : [];
+
                   // clean uri
                   $uri = $this->clearUri($uri);
 
@@ -109,7 +114,7 @@ class Router implements RouterInterface
                   }
 
                   // create new route with properties
-                  $route = new Route($uri, $method, (is_callable($middlewares) ? [$middlewares] : [...$middlewares]), $action);
+                  $route = new Route($uri, $method, (is_callable($middlewares) ? [$middlewares] : [...$middlewares]), $action, $paramsNames);
 
                   // add new route
                   $this->routes->append($route);
@@ -120,7 +125,6 @@ class Router implements RouterInterface
             }
       }
 
-
       /**
        * return the clean uri value
        */
@@ -129,18 +133,25 @@ class Router implements RouterInterface
             return rtrim($uri, $uri === '/' ? '' : '/');
       }
       /**
-       * get the route associate to method and uri
+       * get the route associate to method and incomming uri
        */
-      public function getRoute(string $method, string $uri): ?Route
+      public function getRoute(string $method, string $incomingUri): ?Route
       {
             $route = null;
 
             foreach ($this->routes as $_route) {
-                  if ($_route->getMethod() === $method && $_route->getUri() === $uri) {
+
+                  if (!empty($_route->getParamsNames())) {
+                        $this->request->setParams($incomingUri, $_route->getUri(), $_route->getParamsNames());
+                  }
+
+                  // match route without params and route with params
+                  if ($_route->getMethod() === $method && ($this->request->getCurrentUri() === $incomingUri || $_route->getUri() === $incomingUri)) {
                         $route = $_route;
                         break;
                   }
             }
+
 
             return $route;
       }
@@ -219,6 +230,7 @@ class Router implements RouterInterface
 
                   // get uri from incoming method
                   $request_uri = $uri_from_prefix !== "" ? $uri_from_prefix : $this->clearUri($this->request->getUri());
+
                   if (!in_array($request_method, Router::SUPPORTED_METHODS, true)) {
                         throw new RouterException(sprintf("Unsupported method '" . $request_method . "' from request send"));
                   }

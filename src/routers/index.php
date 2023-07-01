@@ -14,6 +14,10 @@ function userRouter(): Router
 
       // init routes
 
+      $router->get("/fetch/one/:id/:restaurandId", function (Request $req, Response $res) {
+            HomeController($req, $res);
+      });
+
       $router->get("/", function (Request $req, Response $res) {
             HomeController($req, $res);
       });
@@ -22,6 +26,8 @@ function userRouter(): Router
       $router->get("/all", function (Request $req, Response $res) {
             HomeController($req, $res);
       });
+
+
 
 
       $router->post("/", function (Request $req, Response $res) {

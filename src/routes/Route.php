@@ -13,6 +13,11 @@ class Route implements RouteInterface
       private string $uri;
 
       /**
+       * names of params into route
+       */
+      private array $paramsNames = [];
+
+      /**
        * method associate to route
        */
       private string $method;
@@ -29,12 +34,13 @@ class Route implements RouteInterface
       private Closure $action;
 
 
-      public function __construct(string $uri, string $method, array $middlewares, Closure $action)
+      public function __construct(string $uri, string $method, array $middlewares, Closure $action, array $paramsNames = [])
       {
             $this->setUri($uri);
             $this->setMethod($method);
             $this->setMiddlewares($middlewares);
             $this->setAction($action);
+            $this->setParamsNames($paramsNames);
       }
 
       /**
@@ -113,6 +119,24 @@ class Route implements RouteInterface
       public function setAction($action): self
       {
             $this->action = $action;
+
+            return $this;
+      }
+
+
+      public function getParamsNames(): array
+      {
+            return $this->paramsNames;
+      }
+
+      /**
+       * Set params of route
+       *
+       * @return  self
+       */
+      public function setParamsNames(array $paramsNames): self
+      {
+            $this->paramsNames = $paramsNames;
 
             return $this;
       }

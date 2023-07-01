@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\interface\RequestInterface;
+use Exception;
 
 /**
  * Class Request to manage entry request
@@ -11,7 +12,7 @@ class Request implements RequestInterface
 {
       private array $body = [];
       private array $query = [];
-      // private array $params = [];
+      private array $params = [];
       private array $httpValues = [
             "http" => [],
             "request" => [],
@@ -19,6 +20,10 @@ class Request implements RequestInterface
             "server" => [],
             "system" => []
       ];
+
+      private const PARAM_RGX = "#^(:[a-zA-Z_]+)$#";
+
+      private string $currentUri = "";
 
 
       function __construct()
@@ -28,15 +33,23 @@ class Request implements RequestInterface
 
       public function __call($name, $arguments)
       {
-            if (preg_match("#^hasContentType#", $name, $matched)) {
-                  $contentType = str_replace($matched[0], "", $name);
-                  return $this->hasContentType(strtolower($contentType));
-            }
-            if (preg_match("#^get(Http|Request|Remote|Server|System)Value$#", $name, $matched)) {
-                  $requestKey = strtolower(str_replace(["get", "value"], "", strtolower($matched[0])));
-                  return $this->get($requestKey, $arguments[0]);
+            try {
+                  if (preg_match("#^hasContentType#", $name, $matched)) {
+                        $contentType = str_replace($matched[0], "", $name);
+                        return $this->hasContentType(strtolower($contentType));
+                  }
+                  if (preg_match("#^get(Http|Request|Remote|Server|System)Value$#", $name, $matched)) {
+                        $requestKey = strtolower(str_replace(["get", "value"], "", strtolower($matched[0])));
+                        return $this->get($requestKey, $arguments[0]);
+                  }
+                  throw new Exception("Invalid method name call: " . __METHOD__, 1);
+            } catch (\Throwable $th) {
+                  throw $th;
             }
       }
+
+
+
 
       /**
        * Set body request value from incoming request which only has application/json value from content-type 
@@ -238,5 +251,99 @@ class Request implements RequestInterface
             $query_string = $this->get("request", "query");
             $uri = $this->get("request", "uri");
             return !empty($query_string) ? str_replace("?" . $query_string, "", $uri) : $uri;
+      }
+
+      /**
+       * Get the value of params
+       */
+      public function getParams()
+      {
+            return $this->params;
+      }
+
+
+      public function hasParamsNames(string $uri): bool
+      {
+            $found = false;
+
+            foreach (explode("/", $uri) as $value) {
+                  if (preg_match(self::PARAM_RGX, $value, $matched) === 1) {
+                        $found = true;
+                        break;
+                  }
+            }
+
+            return $found;
+      }
+
+      /**
+       * return the names of params from schema of uri
+       */
+      public function getParamsNamesIntoUri(string $uriSchema): array
+      {
+
+            $params = [];
+
+            foreach (explode("/", $uriSchema) as $pos => $param_symbole) {
+                  if (preg_match(self::PARAM_RGX, $param_symbole, $matched) === 1) {
+                        $params[$pos] = str_replace(":", "", $param_symbole);
+                  }
+            }
+
+            return $params;
+      }
+
+      /**
+       * return array that contains uri valided and the params with values   
+       */
+      public function setParams(string $incomingUri, string $schemaUri, array $paramsNames): self
+      {
+
+            $paramsValues = [];
+
+            // array of uri with values
+            $partsofIncomingUri = explode("/", $incomingUri);
+
+            // array of uri with params names
+            $partsofShemaUri = explode("/", $schemaUri);
+
+            if (count($partsofIncomingUri) === count($partsofShemaUri)) {
+
+                  // assoc all params to value
+                  foreach ($partsofIncomingUri as $key => $value) {
+                        $partsofShemaUri[$key] = $value;
+                        if (array_key_exists($key, $paramsNames)) {
+                              $param_name = $paramsNames[$key];
+                              $paramsValues[$param_name] = $partsofIncomingUri[$key];
+                        }
+                  }
+            }
+
+            if (implode("/", $partsofIncomingUri) === implode("/", $partsofShemaUri)) {
+                  $this->params = $paramsValues;
+                  $this->setCurrentUri($incomingUri);
+            }
+
+            return $this;
+      }
+
+      /**
+       * Get the value of currentUri
+       */
+      public function getCurrentUri(): string
+      {
+            return $this->currentUri;
+      }
+
+      /**
+       * Set the value of currentUri
+       *
+       * @return  self
+       */
+      public function setCurrentUri($currentUri): self
+      {
+            $this->currentUri = $currentUri;
+
+            return $this;
       }
 }
