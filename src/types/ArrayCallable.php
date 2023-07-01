@@ -2,11 +2,11 @@
 
 namespace App\Types;
 
-use App\interface\ArrayCallabeInterface;
+use App\interface\ArrayCallableInterface;
 use Closure;
 use InvalidArgumentException;
 
-final class ArrayCallable extends \ArrayObject implements ArrayCallabeInterface
+final class ArrayCallable extends \ArrayObject implements ArrayCallableInterface
 {
 
       public function __construct(array $cbs = [])
