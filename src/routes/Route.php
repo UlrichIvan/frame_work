@@ -4,6 +4,7 @@ namespace App\Routes;
 
 use App\interface\RouteInterface;
 use Closure;
+use InvalidArgumentException;
 
 class Route implements RouteInterface
 {
@@ -56,7 +57,7 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setUri($uri): self
+      public function setUri(string $uri): self
       {
             $this->uri = $uri;
 
@@ -76,7 +77,7 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setMethod($method): self
+      public function setMethod(string $method): self
       {
             $this->method = $method;
 
@@ -96,8 +97,18 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setMiddlewares($middlewares): self
+      public function setMiddlewares(array $middlewares): self
       {
+            try {
+                  foreach ($middlewares as $middleware) {
+                        if (!is_callable($middleware)) {
+                              throw new InvalidArgumentException("Invalid middleware send. all middleware must be a closure", 1);
+                        }
+                  }
+            } catch (\Throwable $th) {
+                  throw $th;
+            }
+
             $this->middlewares = $middlewares;
 
             return $this;
@@ -116,7 +127,7 @@ class Route implements RouteInterface
        *
        * @return  self
        */
-      public function setAction($action): self
+      public function setAction(Closure $action): self
       {
             $this->action = $action;
 
