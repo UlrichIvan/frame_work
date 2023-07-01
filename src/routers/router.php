@@ -239,7 +239,7 @@ class Router implements RouterInterface
                   $route = $this->getRoute($request_method, $request_uri);
 
                   if (empty($route)) {
-                        return $this->response->setStatus(404)->close();
+                        return $this->response->status(404)->close();
                   }
 
 
