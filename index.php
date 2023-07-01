@@ -10,9 +10,9 @@ $app = new App();
 
 // add action before execute the any action associate to prefix uri
 
-$app->beforeIt("/api/users")->do([function (Request $req, Response $res) {
-      echo "beforeIt\n";
-}]);
+// $app->beforeIt("/api/users")->do([function (Request $req, Response $res) {
+//       $req->add("attributes", $req->getParams());
+// }]);
 
 // add each router to his prefix uri
 

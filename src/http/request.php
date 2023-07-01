@@ -42,7 +42,7 @@ class Request implements RequestInterface
                         $requestKey = strtolower(str_replace(["get", "value"], "", strtolower($matched[0])));
                         return $this->get($requestKey, $arguments[0]);
                   }
-                  throw new Exception("Invalid method name call: " . __METHOD__, 1);
+                  throw new Exception("Invalid method name call: '" . $name . "'", 1);
             } catch (\Throwable $th) {
                   throw $th;
             }
@@ -141,11 +141,7 @@ class Request implements RequestInterface
        */
       public function add(string $key, mixed $value): ?self
       {
-            if (empty($this->$key)) {
-                  $this->$key = $value;
-            }
-
-            $this->$key = $value;
+            $this->{$key} = $value;
 
             return $this;
       }
@@ -169,19 +165,19 @@ class Request implements RequestInterface
       public function setRequestValues(array $server): void
       {
             foreach ($server as $key => $item) {
-                  if (preg_match('#HTTP_#', $key, $matched)) {
+                  if (preg_match('#HTTP_#', $key, $matched) === 1) {
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['http'][$field] = $item;
-                  } else if (preg_match('#REQUEST_#', $key, $matched)) {
+                  } else if (preg_match('#REQUEST_#', $key, $matched) === 1) {
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['request'][$field] = $item;
-                  } else if (preg_match('#REMOTE_#', $key, $matched)) {
+                  } else if (preg_match('#REMOTE_#', $key, $matched) === 1) {
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['remote'][$field] = $item;
-                  } else if (preg_match('#SERVER_#', $key, $matched)) {
+                  } else if (preg_match('#SERVER_#', $key, $matched) === 1) {
                         $field = strtolower(str_replace($matched[0], "", $key));
                         $this->httpValues['server'][$field] = $item;
-                  } else if (preg_match('#^QUERY_STRING$#', $key, $matched)) {
+                  } else if (preg_match('#^QUERY_STRING$#', $key, $matched) === 1) {
                         $field = strtolower(str_replace("_STRING", "", $matched[0]));
                         $this->httpValues['request'][$field] = $item;
                   } else {
@@ -262,6 +258,9 @@ class Request implements RequestInterface
       }
 
 
+      /**
+       * verify if $uri has paramsNames
+       */
       public function hasParamsNames(string $uri): bool
       {
             $found = false;

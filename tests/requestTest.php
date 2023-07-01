@@ -36,4 +36,37 @@ final class RequestTest extends TestCase
 
             $this->assertSame("test", $request->getPropertyValue("name"));
       }
+
+      public function testHasParamsNames()
+      {
+            $request = new Request();
+
+            $this->assertTrue($request->hasParamsNames("fetch/one/:id"));
+      }
+
+      public function testGetParamsNamesIntoUri()
+      {
+            $request = new Request();
+
+            $params = $request->getParamsNamesIntoUri("fetch/one/:id");
+
+            $this->assertNotEmpty($params);
+            $this->assertIsArray($params);
+            $this->assertSame(["id"], array_values($params));
+            $this->assertSame([2], array_keys($params));
+      }
+
+      public function testSetParams()
+      {
+            $request = new Request();
+
+            $request->setParams("fetch/one/1", "fetch/one/:id", [2 => "id"]);
+
+            $params = $request->getParams();
+
+            $this->assertNotEmpty($params);
+            $this->assertIsArray($params);
+            $this->assertSame(["id" => '1'], $params);
+            $this->assertSame("fetch/one/1", $request->getCurrentUri());
+      }
 }
