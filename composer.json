@@ -11,9 +11,10 @@
       "App\\": "src/"
     },
     "files": [
-      "src/before/index.php",
-      "src/controllers/index.php",
-      "src/routers/index.php"
+      "src/before/before.php",
+      "src/controllers/controllers.php",
+      "src/routers/personals/userRouter.php",
+      "src/routers/personals/managerRouter.php"
     ],
     "classmap": [
       "src"

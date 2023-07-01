@@ -16,7 +16,7 @@ class Response implements ResponseInterface
       {
             try {
                   if (!in_array($status, Response::HTTP_CODE_RESPONSES)) {
-                        throw new \Exception("Invalid status code send $status", 1);
+                        throw new \Exception("Invalid status code send $status. status can be  " . implode(",", Response::HTTP_CODE_RESPONSES), 1);
                   }
                   $this->status = $status;
                   http_response_code($status);
@@ -31,7 +31,7 @@ class Response implements ResponseInterface
             return !empty($this->status) ? $this->status : null;
       }
 
-      public function setStatusText(int $statusText = null): self
+      public function setStatusText(string $statusText = ""): self
       {
             $this->statusText = $statusText;
             return $this;
@@ -44,7 +44,6 @@ class Response implements ResponseInterface
 
       public function json(mixed $data): ?self
       {
-            header('Content-Type: application/json; charset=utf-8');
             echo json_encode($data);
             $this->close();
             return $this;
@@ -53,5 +52,11 @@ class Response implements ResponseInterface
       public function close(): void
       {
             exit;
+      }
+
+      public function setHeader(string $responseName, string $content): self
+      {
+            header(`{$responseName}: {$content}`);
+            return $this;
       }
 }
