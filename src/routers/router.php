@@ -138,18 +138,18 @@ class Router implements RouterInterface
       /**
        * get the route associate to method and incomming uri
        */
-      public function getRoute(string $method, string $incomingUri): ?Route
+      public function getRoute(string $method, string $uri): ?Route
       {
             $route = null;
 
             foreach ($this->routes as $_route) {
 
                   if (!empty($_route->getParamsNames())) {
-                        $this->request->setParams($incomingUri, $_route->getUri(), $_route->getParamsNames());
+                        $this->request->setParams($uri, $_route->getUri(), $_route->getParamsNames());
                   }
 
                   // match route without params and route with params
-                  if ($_route->getMethod() === $method && ($this->request->getCurrentUri() === $incomingUri || $_route->getUri() === $incomingUri)) {
+                  if ($_route->getMethod() === $method && ($this->request->getCurrentUri() === $uri || $_route->getUri() === $uri)) {
                         $route = $_route;
                         break;
                   }

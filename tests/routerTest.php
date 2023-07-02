@@ -22,7 +22,7 @@ final class RouterTest extends TestCase
             $this->assertEmpty($router->getRoutes());
       }
 
-      public function testAddRouteWithoutMiddlewares()
+      public function testRouteWithoutMiddlewares()
       {
             $router = new Router();
 
@@ -38,7 +38,7 @@ final class RouterTest extends TestCase
             $this->assertCount(0, $route->getMiddlewares());
       }
 
-      public function testAddRouteWithCallbackAndMiddleware()
+      public function testRouteWithCallbackAndMiddleware()
       {
             $router = new Router();
 
@@ -58,7 +58,7 @@ final class RouterTest extends TestCase
       }
 
 
-      public function testAddRouteWithArrayMiddlewares()
+      public function testRouteWithArrayMiddlewares()
       {
             $router = new Router();
 
@@ -206,11 +206,68 @@ final class RouterTest extends TestCase
             $this->assertSame("/post", $router->clearUri("/post/"));
       }
 
+      public function testGetRouteWithoutParamsSuccess()
+      {
+            $router = new Router();
+
+            $router->post(
+                  "/",
+                  function () {
+                        //     code here...
+                  }
+            );
+
+            $this->assertInstanceOf(
+                  Route::class,
+                  $router->getRoute("post", "/")
+            );
+      }
+
+
+      public function testGetRouteWithParamsSuccess()
+      {
+            $router = new Router();
+
+            $router->post(
+                  "/users/:id",
+                  function () {
+                        //     code here...
+                  }
+            );
+
+            $route = $router->getRoute("post", "/users/:id");
+
+            $this->assertInstanceOf(
+                  Route::class,
+                  $route
+            );
+
+            $this->assertSame(
+                  "/users/:id",
+                  $route->getUri()
+            );
+
+            $this->assertSame(
+                  [2 => "id"],
+                  $route->getParamsNames()
+            );
+      }
+
+      public function testGetRouteWithoutParamsLost()
+      {
+            $router = new Router();
+
+            $this->assertNull(
+                  $router->getRoute("post", "/")
+            );
+      }
+
       // public function getMockRequest()
       // {
       //       $mock = $this->createMock(Request::class);
       //       $mock->method("run")->will;
       // }
+
       // public function testMethodRequest()
       // {
       //       $router = new Router();
