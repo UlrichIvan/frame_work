@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         colors="true"
+         >
+         <!-- for tests -->
+         <testsuites >
+           <testsuite name="units tests">
+            <directory>
+            ./tests
+            </directory>
+           </testsuite>
+         </testsuites>    
+          <coverage>
+              <include>
+                  <directory suffix=".php">src</directory>
+              </include>
+          </coverage>
+          <!-- for coverage -->
+            <!-- <whitelist processUncoveredFromWhiteList="true">
+              <directory suffic=".php">
+                src
+               </directory>
+            </whitelist> -->
+         
+</phpunit>

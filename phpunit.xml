@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit
-         displayDetailsOnTestsThatTriggerDeprecations="true"
-         displayDetailsOnTestsThatTriggerErrors="true"
-         displayDetailsOnTestsThatTriggerNotices="true"
-         displayDetailsOnTestsThatTriggerWarnings="true"
-         colors="true"
-         >
-         <testsuites >
-           <testsuite name="units tests">
-            <directory>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" displayDetailsOnTestsThatTriggerDeprecations="true" displayDetailsOnTestsThatTriggerErrors="true" displayDetailsOnTestsThatTriggerNotices="true" displayDetailsOnTestsThatTriggerWarnings="true" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd">
+  <!-- for tests -->
+  <testsuites>
+    <testsuite name="units tests">
+      <directory>
             ./tests
-            </directory>
-           </testsuite>
-         </testsuites>     
+      </directory>
+    </testsuite>
+  </testsuites>
+  <coverage/>
+  
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </source>
 </phpunit>

@@ -3,6 +3,7 @@
 namespace App\tests\routes;
 
 use App\Routes\Route;
+use App\Types\ArrayCallable;
 use ArrayObject;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -50,11 +51,11 @@ final class RouteTest extends TestCase
                   // do something...
             }, ["id" => 1]);
 
-            $route->setMiddlewares([
+            $route->setMiddlewares(new ArrayCallable([
                   function () {
                         // code here...
                   }
-            ]);
+            ]));
 
             $this->assertNotEmpty($route->getMiddlewares());
             $this->assertIsArray($route->getMiddlewares());
@@ -69,9 +70,9 @@ final class RouteTest extends TestCase
 
             $this->expectException(InvalidArgumentException::class);
 
-            $route->setMiddlewares([
+            $route->setMiddlewares(new ArrayCallable([
                   "test"
-            ]);
+            ]));
       }
 
       public function testGetterAndSetterFromActionPropertyPass()

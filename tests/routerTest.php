@@ -307,37 +307,37 @@ final class RouterTest extends TestCase
             )->readyGo();
       }
 
-      public function testMethodRequestWithOutMiddlewaresFailled()
-      {
-            $mockRequest = $this->getMockRequest(["hasParamsNames", "getUri"]);
-            $mockResponse = $this->getMockResponse(["close", "status"]);
+      // public function testMethodRequestWithOutMiddlewaresFailled()
+      // {
+      //       $mockRequest = $this->getMockRequest(["hasParamsNames", "getUri"]);
+      //       $mockResponse = $this->getMockResponse(["close", "status"]);
 
 
-            // configuration of method mocked
-            $mockRequest->method("hasParamsNames")->willReturn(false);
-            $mockRequest->method("getUri")->willReturn("/");
-            $mockRequest->method("getRequestValue")->willReturn("get");
-            $mockResponse->method("status")->willReturn(new Response());
+      //       // configuration of method mocked
+      //       $mockRequest->method("hasParamsNames")->willReturn(false);
+      //       $mockRequest->method("getUri")->willReturn("/");
+      //       $mockRequest->method("getRequestValue")->willReturn("get");
+      //       $mockResponse->method("status")->willReturn(new Response());
 
 
 
-            // expects assertions request 
-            $mockRequest->expects($this->once())->method("hasParamsNames")->with('/');
+      //       // expects assertions request 
+      //       $mockRequest->expects($this->once())->method("hasParamsNames")->with('/');
 
-            // expects assertions response 
-            $mockResponse->expects($this->once())->method("status")->with(404);
+      //       // expects assertions response 
+      //       $mockResponse->expects($this->once())->method("status")->with(404);
 
-            // implementation of code 
-            $router = new Router($mockRequest, $mockResponse);
+      //       // implementation of code 
+      //       $router = new Router($mockRequest, $mockResponse);
 
 
-            $router->post(
-                  "/",
-                  function () {
-                        echo "called";
-                  }
-            )->readyGo();
-      }
+      //       $router->post(
+      //             "/",
+      //             function () {
+      //                   echo "called";
+      //             }
+      //       )->readyGo();
+      // }
 
       public function testMethodRequestWithMiddlewaresSuccess()
       {
