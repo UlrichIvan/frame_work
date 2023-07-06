@@ -6,6 +6,8 @@ use App\Exception\RouteException;
 use App\Exception\RouterException;
 use App\Http\Request;
 use App\Http\Response;
+use App\interface\RequestInterface;
+use App\interface\ResponseInterface;
 use App\interface\RouterInterface;
 use App\Routes\Route;
 use App\Types\ArrayCallable;
@@ -39,7 +41,7 @@ class Router implements RouterInterface
        */
       public Response $response;
 
-      public function __construct(Request $request = new Request(), Response $response = new Response())
+      public function __construct(RequestInterface $request = new Request(), ResponseInterface $response = new Response())
       {
             $this->request = $request;
 
@@ -61,14 +63,12 @@ class Router implements RouterInterface
 
                   // uri and callback only
                   if (is_string($params[0]) && is_callable($params[1]) && empty($params[2])) {
-                        $this->addRoute($method, $params[0], $params[1], new ArrayCallable());
-                        return $this;
+                        return $this->addRoute($method, $params[0], $params[1], new ArrayCallable());
                   }
 
                   // uri and callback and middlewares
                   if (is_string($params[0]) && is_callable($params[1]) && !empty($params[2]) && (is_callable($params[2]) || is_array($params[2]))) {
-                        $this->addRoute($method, $params[0], $params[1], is_callable($params[2]) ? $params[2] :  new ArrayCallable($params[2]));
-                        return $this;
+                        return $this->addRoute($method, $params[0], $params[1], is_callable($params[2]) ? $params[2] :  new ArrayCallable($params[2]));
                   }
 
                   throw new InvalidArgumentException("invalid arguments set on '" . $method . "' ");

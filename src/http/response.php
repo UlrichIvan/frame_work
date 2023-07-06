@@ -42,11 +42,10 @@ class Response implements ResponseInterface
             return !empty($this->statusText) ? $this->statusText : null;
       }
 
-      public function json(mixed $data): ?self
+      public function json(mixed $data): void
       {
             echo json_encode($data);
             $this->close();
-            return $this;
       }
 
       public function close(): void

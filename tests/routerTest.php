@@ -9,7 +9,6 @@ use App\Routes\Route;
 use App\Types\ArrayMap;
 use PHPUnit\Framework\TestCase;
 
-
 final class RouterTest extends TestCase
 {
       public function testRouterConstructor()
@@ -262,20 +261,114 @@ final class RouterTest extends TestCase
             );
       }
 
-      // public function getMockRequest()
-      // {
-      //       $mock = $this->createMock(Request::class);
-      //       $mock->method("run")->will;
-      // }
+      public function getMockRequest($onlyMethods)
+      {
+            // set up mock object
+            $mockRequest = $this->getMockBuilder(Request::class)->onlyMethods($onlyMethods)->addMethods(["getRequestValue"])->getMock();
 
-      // public function testMethodRequest()
-      // {
-      //       $router = new Router();
+            return $mockRequest;
+      }
 
-      //       $router->post("/", function (Request $req, Response $res) {
-      //             $res->json(["body" => $req->getBody()]);
-      //       });
+      public function getMockResponse($onlyMethods)
+      {
+            // set up mock object
+            $mockResponse = $this->getMockBuilder(Response::class)->onlyMethods($onlyMethods)->getMock();
 
-      //       $this->assertTrue($router->hasRoute("post", "/"));
-      // }
+            return $mockResponse;
+      }
+
+
+      public function testMethodRequestWithOutMiddlewaresSuccess()
+      {
+            // set up mock object
+            $mockRequest = $this->getMockRequest(["hasParamsNames", "getUri"]);
+
+            // configuration of method mocked
+            $mockRequest->method("hasParamsNames")->willReturn(false);
+            $mockRequest->method("getUri")->willReturn("/");
+            $mockRequest->method("getRequestValue")->willReturn("post");
+
+
+
+            // expects assertions
+            $mockRequest->expects($this->once())->method("hasParamsNames")->with('/');
+
+            $router = new Router($mockRequest);
+
+
+            // actions who will trigger call mocked functions
+            $this->expectOutputString("called");
+
+            $router->post(
+                  "/",
+                  function () {
+                        echo "called";
+                  }
+            )->readyGo();
+      }
+
+      public function testMethodRequestWithOutMiddlewaresFailled()
+      {
+            $mockRequest = $this->getMockRequest(["hasParamsNames", "getUri"]);
+            $mockResponse = $this->getMockResponse(["close", "status"]);
+
+
+            // configuration of method mocked
+            $mockRequest->method("hasParamsNames")->willReturn(false);
+            $mockRequest->method("getUri")->willReturn("/");
+            $mockRequest->method("getRequestValue")->willReturn("get");
+            $mockResponse->method("status")->willReturn(new Response());
+
+
+
+            // expects assertions request 
+            $mockRequest->expects($this->once())->method("hasParamsNames")->with('/');
+
+            // expects assertions response 
+            $mockResponse->expects($this->once())->method("status")->with(404);
+
+            // implementation of code 
+            $router = new Router($mockRequest, $mockResponse);
+
+
+            $router->post(
+                  "/",
+                  function () {
+                        echo "called";
+                  }
+            )->readyGo();
+      }
+
+      public function testMethodRequestWithMiddlewaresSuccess()
+      {
+
+            $mockRequest = $this->getMockRequest(["hasParamsNames", "getUri", "fillBody"]);
+
+            // // configuration of method mocked
+            $mockRequest->method("hasParamsNames")->willReturn(false);
+            $mockRequest->method("getUri")->willReturn("/");
+            $mockRequest->method("getRequestValue")->willReturn("post");
+            $mockRequest->method("fillBody")->willReturn(new Request());
+
+
+            // expects assertions
+            $mockRequest->expects($this->once())->method("hasParamsNames")->with('/');
+            $mockRequest->expects($this->once())->method("fillBody");
+
+            $this->expectOutputString("called");
+
+
+            // actions who will trigger call mocked functions
+            $router = new Router($mockRequest);
+
+            $router->post(
+                  "/",
+                  function () {
+                        echo "called";
+                  },
+                  function (Request $req, Response $res) {
+                        $req->fillBody();
+                  }
+            )->readyGo();
+      }
 }
