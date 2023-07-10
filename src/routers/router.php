@@ -14,7 +14,6 @@ use App\Types\ArrayCallable;
 use App\Types\ArrayMap;
 use InvalidArgumentException;
 use Closure;
-use Error;
 
 /**
  * class to manage routes
@@ -72,8 +71,8 @@ class Router implements RouterInterface
                   }
 
                   throw new InvalidArgumentException("invalid arguments set on '" . $method . "' ");
-            } catch (RouterException $e) {
-                  die($e->getMessage());
+            } catch (InvalidArgumentException $e) {
+                  throw $e;
             }
       }
 
@@ -98,6 +97,7 @@ class Router implements RouterInterface
 
 
 
+
       /**
        * add new routes and action inside of routes mapped property
        */
@@ -112,7 +112,7 @@ class Router implements RouterInterface
 
                   // verify if route with method exists
                   if ($this->hasRoute($method, $uri)) {
-                        throw new Error("Unable to duplicate route' " . $uri . "' with method: '" . $method . "'");
+                        throw new RouteException("Unable to duplicate route' " . $uri . "' with method: '" . $method . "'");
                   }
 
                   // create new route with properties
@@ -122,9 +122,7 @@ class Router implements RouterInterface
 
                   return $this;
             } catch (RouteException $e) {
-                  die($e->getMessage());
-            } catch (InvalidArgumentException $e) {
-                  die($e->getMessage());
+                  throw $e;
             }
       }
 
@@ -244,7 +242,7 @@ class Router implements RouterInterface
                   $route = $this->getRoute($request_method, $request_uri);
 
                   if (empty($route)) {
-                        return $this->response->status(404)->close();
+                        return $this->response->status(404);
                   }
 
 
