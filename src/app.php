@@ -2,10 +2,14 @@
 
 namespace App;
 
+use App\Http\Request;
+use App\Http\Response;
+use App\interface\RequestInterface;
+use App\interface\ResponseInterface;
 use App\Types\ArrayMap;
 use App\Routers\Router;
 use Closure;
-use Exception;
+use InvalidArgumentException;
 
 /**
  * manage application 
@@ -20,12 +24,12 @@ class App extends Router
 
       private ArrayMap $beforeIts;
 
-      function __construct()
+      function __construct(RequestInterface $request = new Request(), ResponseInterface $response = new Response())
       {
             $this->routers = new ArrayMap();
             $this->beforeIts = new ArrayMap();
 
-            parent::__construct();
+            parent::__construct($request, $response);
       }
 
       public function use(string $prefix, Closure $cb): self
@@ -47,11 +51,13 @@ class App extends Router
       public function do(Closure|array $cb, ?string $prefix = null): self
       {
             try {
-                  if ($this->currentPrefix === "" && empty($prefix)) {
-                        throw new Exception("An prefix value must not be empty,please set it before to added action to method " . __METHOD__, 1);
+                  if ($this->currentPrefix === "" && (empty($prefix) || $prefix == "" || !is_string($prefix))) {
+                        throw new InvalidArgumentException("An prefix value must not be empty,please set it before to added action to method " . __METHOD__, 1);
                   }
 
-                  $this->beforeIts->add($prefix ? $prefix : $this->currentPrefix, is_callable($cb) ? [$cb] : [...$cb]);
+                  $this->setCurrentPrefix($prefix ? $prefix : $this->currentPrefix);
+
+                  $this->beforeIts->add($this->getCurrentPrefix(), is_callable($cb) ? [$cb] : [...$cb]);
 
                   return $this;
             } catch (\Throwable $th) {
@@ -67,7 +73,7 @@ class App extends Router
 
                   // match router associate to prefix
                   foreach ($this->routers as $prefix => $router) {
-                        if (preg_match("#^" . $prefix . "#", $request_uri, $matched) && !empty($matched)) {
+                        if (preg_match("#^" . $prefix . "#", $request_uri, $matched) === 1 && !empty($matched)) {
                               $uri = str_replace($matched[0], "", $request_uri);
 
                               // if exists, execute beforeIts action associate to current prefix uri found
@@ -85,7 +91,7 @@ class App extends Router
                               break;
                         }
                   }
-                  return $this->response->status(404)->close();
+                  return $this->response->status(404);
             } catch (\Throwable $th) {
                   throw $th;
             }
@@ -131,5 +137,13 @@ class App extends Router
             $this->currentPrefix = $currentPrefix;
 
             return $this;
+      }
+
+      /**
+       * Get the value of beforeIts
+       */
+      public function getBeforeIts(): ArrayMap
+      {
+            return $this->beforeIts;
       }
 }
