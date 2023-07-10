@@ -4,7 +4,6 @@ namespace App\tests\routes;
 
 use App\Routes\Route;
 use App\Types\ArrayCallable;
-use ArrayObject;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

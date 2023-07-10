@@ -34,15 +34,11 @@ class Request implements RequestInterface
       public function __call($name, $arguments)
       {
             try {
-                  if (preg_match("#^hasContentType#", $name, $matched)) {
-                        $contentType = str_replace($matched[0], "", $name);
-                        return $this->hasContentType(strtolower($contentType));
-                  }
                   if (preg_match("#^get(Http|Request|Remote|Server|System)Value$#", $name, $matched)) {
                         $requestKey = strtolower(str_replace(["get", "value"], "", strtolower($matched[0])));
                         return $this->get($requestKey, $arguments[0]);
                   }
-                  throw new Exception("Invalid method name call: '" . $name . "'", 1);
+                  throw new Exception("call unexisting method '" . $name . "' on " . __CLASS__, 1);
             } catch (\Throwable $th) {
                   throw $th;
             }
@@ -147,18 +143,6 @@ class Request implements RequestInterface
       }
 
 
-      /** 
-       * Verify if request has a specific content type required by application
-       */
-      public function hasContentType(string $type): bool
-      {
-
-            if (Request::CONTENT_TYPE_URL_ENCODED === "application/x-www-form-" . $type) {
-                  return true;
-            }
-            return false;
-      }
-
       /**
        * set all values request from incoming request
        */
@@ -194,6 +178,8 @@ class Request implements RequestInterface
       {
             return $this->httpValues;
       }
+
+
 
       /**
        * Get the value of query

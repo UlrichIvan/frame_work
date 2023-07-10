@@ -10,7 +10,7 @@ function HomeController(Request $req, Response $res)
       $res->status(200)->header("Content-Type:", "application/json; charset=utf-8")->json(
             [
                   "query" => $req->getQuery(),
-                  "params" => $req->getParams()
+                  "params" => $req->getParams(),
             ]
       );
 }
